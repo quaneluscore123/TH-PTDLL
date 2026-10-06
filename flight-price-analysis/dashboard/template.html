@@ -1,0 +1,371 @@
+<title>Giá vé máy bay Mỹ 2022–2027</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Bố cục: bảng thông tin sân bay — thanh điều hướng cố định, các khối xếp theo câu hỏi phân tích, số liệu dạng mono */
+:root {
+  --bg: #f4f6f9; --surface: #ffffff; --ink: #10213a; --ink-2: #46546a; --muted: #7d8898;
+  --line: #e1e6ed; --accent: #2a78d6; --urgent: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --good: #0f7b3e; --chip: #e8f0fb;
+  --f-display: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e141d; --surface: #151d29; --ink: #eef2f7; --ink-2: #b6c0ce; --muted: #7e8a9b;
+  --line: #253042; --accent: #3987e5; --urgent: #d95926; --s3: #199e70; --s4: #c98500;
+  --good: #3ccf7a; --chip: #1c2a3d; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0e141d; --surface: #151d29; --ink: #eef2f7; --ink-2: #b6c0ce; --muted: #7e8a9b;
+  --line: #253042; --accent: #3987e5; --urgent: #d95926; --s3: #199e70; --s4: #c98500;
+  --good: #3ccf7a; --chip: #1c2a3d; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--f-body); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 20px; padding-block: 0 64px; }
+header.top { padding-block: 32px 20px; display: grid; gap: 6px; }
+.eyebrow { font: 500 12px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 700 clamp(30px, 5vw, 46px)/1.05 var(--f-display); margin: 0; letter-spacing: -.01em; text-wrap: balance; }
+h1 .route { color: var(--accent); }
+.lede { color: var(--ink-2); max-width: 72ch; margin: 4px 0 0; }
+nav.tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  border-bottom: 1px solid var(--line); display: flex; gap: 4px; overflow-x: auto; padding-block: 8px; scrollbar-width: none; }
+nav.tabs a { font: 600 15px var(--f-display); letter-spacing: .02em; color: var(--ink-2); text-decoration: none;
+  padding: 6px 12px; border-radius: 6px; white-space: nowrap; }
+nav.tabs a:hover, nav.tabs a:focus-visible { background: var(--chip); color: var(--ink); outline: none; }
+section { padding-top: 36px; scroll-margin-top: 56px; display: grid; gap: 16px; }
+h2 { font: 700 28px/1.1 var(--f-display); margin: 0; text-wrap: balance; }
+h2 small { display: block; font: 400 14px/1.5 var(--f-body); color: var(--ink-2); margin-top: 6px; max-width: 80ch; }
+h3 { font: 600 18px/1.2 var(--f-display); margin: 0 0 2px; letter-spacing: .01em; }
+.sub { color: var(--muted); font-size: 13px; margin: 0 0 10px; }
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.c4 { grid-column: span 4; } .c5 { grid-column: span 5; } .c6 { grid-column: span 6; } .c7 { grid-column: span 7; }
+.c8 { grid-column: span 8; } .c12 { grid-column: span 12; } .c3 { grid-column: span 3; }
+@media (max-width: 900px) { .c3, .c4, .c5, .c6, .c7, .c8 { grid-column: span 12; } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; min-width: 0; }
+.chart { position: relative; height: 300px; }
+.chart.tall { height: 420px; } .chart.short { height: 220px; }
+.kpis { display: grid; gap: 12px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 760px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 2px; }
+.kpi .v { font: 600 30px/1.1 var(--f-display); font-variant-numeric: tabular-nums; }
+.kpi .l { font-size: 13px; color: var(--ink-2); }
+.kpi .v.urgent { color: var(--urgent); } .kpi .v.accent { color: var(--accent); }
+.tbl { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 600 12px var(--f-mono); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+td.n, th.n { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.best td { background: var(--chip); font-weight: 600; }
+.pill { display: inline-block; font: 500 12px var(--f-mono); padding: 2px 8px; border-radius: 99px; background: var(--chip); color: var(--ink); }
+.pill.up { color: var(--urgent); } .pill.good { color: var(--good); }
+code, .mono { font-family: var(--f-mono); font-size: .92em; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+.controls label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); font-family: var(--f-mono); text-transform: uppercase; letter-spacing: .05em; }
+select { font: 500 15px var(--f-mono); color: var(--ink); background: var(--surface); border: 1px solid var(--line);
+  border-radius: 6px; padding: 7px 10px; min-width: 150px; }
+select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.board { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-top: 14px; }
+.board div { border-left: 3px solid var(--line); padding-left: 10px; }
+.board .v { font: 600 26px/1.1 var(--f-display); font-variant-numeric: tabular-nums; }
+.board .l { font-size: 12px; color: var(--muted); }
+.board .now { border-color: var(--accent); } .board .rush { border-color: var(--urgent); }
+.note { font-size: 13px; color: var(--ink-2); background: var(--chip); border-radius: 8px; padding: 10px 12px; margin: 0; }
+ul.flow { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); counter-reset: s; }
+ul.flow li { counter-increment: s; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--ink-2); }
+ul.flow li b { display: block; font: 600 16px var(--f-display); color: var(--ink); }
+ul.flow li b::before { content: counter(s) " · "; color: var(--accent); }
+footer { margin-top: 40px; color: var(--muted); font-size: 12px; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">Tích hợp &amp; phân tích dữ liệu lớn · PySpark</div>
+    <h1>Giá vé máy bay Mỹ <span class="route">2022 → 2027</span></h1>
+    <p class="lede" id="lede">Phân tích 82 triệu vé tìm trên Expedia năm 2022, tích hợp ngày lễ, thời tiết, nhiên liệu, lạm phát và giá vé thực tế của Bộ Giao thông Mỹ, rồi dự báo đến hết năm 2027.</p>
+  </header>
+
+  <nav class="tabs" aria-label="Các phần">
+    <a href="#tong-quan">Tổng quan</a><a href="#dat-ve">Đặt sớm hay đi gấp</a><a href="#yeu-to">Yếu tố &amp; tương quan</a>
+    <a href="#mo-hinh">Mô hình T9–T10/2022</a><a href="#du-bao">Dự báo 2023–2027</a><a href="#tra-cuu">Tra cứu tuyến</a><a href="#du-lieu">Dữ liệu</a>
+  </nav>
+
+  <section id="tong-quan">
+    <h2>Tổng quan<small>Toàn bộ dữ liệu sau làm sạch, tính bằng Spark trên máy cá nhân (16 GB RAM).</small></h2>
+    <div class="kpis" id="kpis"></div>
+    <ul class="flow">
+      <li><b>Raw</b>CSV Expedia 31 GB, 82,1 triệu dòng</li>
+      <li><b>Bronze</b>Parquet zstd 4,5 GB, giữ nguyên dữ liệu thô</li>
+      <li><b>Silver</b>Làm sạch + 7 nguồn ngoài, 57 cột</li>
+      <li><b>Gold</b>21 bảng tổng hợp + ma trận tương quan</li>
+      <li><b>ML</b>5 mô hình Spark MLlib, kiểm tra T9–T10</li>
+      <li><b>Dự báo</b>Backtest 2023, hiệu chỉnh, đến 12/2027</li>
+    </ul>
+  </section>
+
+  <section id="dat-ve">
+    <h2>Đặt sớm hay đi gấp?<small>Giá trung vị theo số ngày đặt trước ngày bay. Dải mờ là khoảng giữa 25% và 75% số vé.</small></h2>
+    <div class="grid">
+      <div class="panel c8"><h3>Đường giá theo số ngày đặt trước</h3><p class="sub" id="curveSub"></p><div class="chart tall"><canvas id="chCurve"></canvas></div></div>
+      <div class="panel c4"><h3>Ba nhóm thời điểm đặt</h3><p class="sub">So với nhóm đặt sớm 31–60 ngày</p><div class="tbl"><table id="tblWindows"></table></div>
+        <p class="note" id="windowNote" style="margin-top:14px"></p></div>
+      <div class="panel c6"><h3>Đội giá khi đặt 1–7 ngày, theo hãng</h3><p class="sub">% chênh giá trung vị so với đặt sớm 31–60 ngày</p><div class="chart"><canvas id="chPremAir"></canvas></div></div>
+      <div class="panel c6"><h3>Tuyến đội giá ít nhất và nhiều nhất</h3><p class="sub">Cùng phép so sánh, các tuyến có ≥ 20.000 vé</p><div class="chart"><canvas id="chPremRoute"></canvas></div></div>
+    </div>
+  </section>
+
+  <section id="yeu-to">
+    <h2>Yếu tố ảnh hưởng và hệ số tương quan<small>Pearson tính trên toàn bộ dữ liệu, Spearman trên mẫu 3%, tỉ số η cho biến phân loại. Kết quả dùng để chọn chỉ số đưa vào huấn luyện.</small></h2>
+    <div class="grid">
+      <div class="panel c7"><h3>Tương quan với giá vé</h3><p class="sub">Pearson r, sắp theo độ lớn</p><div class="chart tall"><canvas id="chCorr"></canvas></div></div>
+      <div class="panel c5"><h3>Biến phân loại (η)</h3><p class="sub">Phần giá vé được giải thích bởi nhóm</p><div class="chart short"><canvas id="chEta"></canvas></div>
+        <h3 style="margin-top:16px">Chỉ số được chọn cho mô hình</h3><div id="selected"></div></div>
+      <div class="panel c3"><h3>Theo thứ của ngày bay</h3><div class="chart short"><canvas id="chDow"></canvas></div></div>
+      <div class="panel c3"><h3>Theo giờ khởi hành</h3><div class="chart short"><canvas id="chHour"></canvas></div></div>
+      <div class="panel c3"><h3>Theo số điểm dừng</h3><div class="chart short"><canvas id="chStops"></canvas></div></div>
+      <div class="panel c3"><h3>Quanh ngày lễ</h3><div class="chart short"><canvas id="chHol"></canvas></div></div>
+    </div>
+  </section>
+
+  <section id="mo-hinh">
+    <h2>Mô hình: học tháng 4–8, dự đoán tháng 9–10/2022<small>Mẫu 5% của Silver. Mô hình chưa từng thấy chuyến bay nào của tháng 9–10.</small></h2>
+    <div class="grid">
+      <div class="panel c7"><h3>So sánh 5 mô hình</h3><p class="sub">Sai số trên tập kiểm tra tháng 9–10/2022</p><div class="tbl"><table id="tblModels"></table></div></div>
+      <div class="panel c5"><h3>Giá trị của việc tích hợp dữ liệu</h3><p class="sub">Cùng mô hình, có và không có nguồn ngoài</p><div class="tbl"><table id="tblAbl"></table></div>
+        <h3 style="margin-top:16px">Sai số theo thời điểm đặt</h3><div class="tbl"><table id="tblErrW"></table></div></div>
+      <div class="panel c8"><h3>Giá trung bình theo ngày bay: thực tế và dự đoán</h3><p class="sub" id="testSub"></p><div class="chart"><canvas id="chTest"></canvas></div></div>
+      <div class="panel c4"><h3>Chỉ số quan trọng nhất</h3><p class="sub" id="impSub"></p><div class="chart"><canvas id="chImp"></canvas></div></div>
+    </div>
+  </section>
+
+  <section id="du-bao">
+    <h2>Dự báo 2023 → 2027<small>Bước 1: chỉ dùng thông tin đến hết 2022 để dự báo 2023 rồi so với giá thực tế của DOT. Bước 2: hiệu chỉnh và kiểm tra lại trên Q1/2024. Bước 3: dự báo đến 12/2027.</small></h2>
+    <div class="grid">
+      <div class="panel c12"><h3>Chỉ số giá vé máy bay (CPI) — thực tế và dự báo</h3><p class="sub" id="cpiSub"></p><div class="chart"><canvas id="chCpi"></canvas></div></div>
+      <div class="panel c7"><h3>Backtest 2023: dự báo từ dữ liệu 2022 so với thực tế</h3><p class="sub">Giá vé từng tuyến × quý, so với DOT 2023</p><div class="tbl"><table id="tblBt"></table></div></div>
+      <div class="panel c5"><h3>Trung bình các tuyến theo quý 2023</h3><p class="sub">USD, giá vé một chiều</p><div class="chart short"><canvas id="chBtQ"></canvas></div>
+        <h3 style="margin-top:16px">Kiểm tra sau hiệu chỉnh: Q1/2024</h3><div class="tbl"><table id="tblV24"></table></div></div>
+      <div class="panel c12"><h3>Giá trung bình các tuyến theo năm</h3><p class="sub">2022 là thực tế Expedia; từ 2023 là ước tính và dự báo</p><div class="tbl"><table id="tblYear"></table></div></div>
+    </div>
+  </section>
+
+  <section id="tra-cuu">
+    <h2>Tra cứu: giá dự báo cho một chuyến bay<small>Chọn tuyến và tháng bay để xem giá dự báo theo từng ngày đặt trước.</small></h2>
+    <div class="panel">
+      <div class="controls">
+        <label for="selRoute">Tuyến<select id="selRoute"></select></label>
+        <label for="selMonth">Tháng bay<select id="selMonth"></select></label>
+      </div>
+      <div class="board" id="board"></div>
+      <div class="chart" style="margin-top:14px"><canvas id="chPlan"></canvas></div>
+      <p class="note" style="margin-top:12px">Giá dự báo = mức giá Expedia 2022 của tuyến × chỉ số CPI vé máy bay của tháng bay (thực tế hoặc dự báo) × hệ số hiệu chỉnh từ backtest 2023 × hệ số đường giá theo số ngày đặt trước. Đây là giá tìm kiếm trên Expedia (đã gồm thuế phí, một chiều).</p>
+    </div>
+  </section>
+
+  <section id="du-lieu">
+    <h2>Dữ liệu đã tạo ra<small>Các bảng kết quả xuất ra thư mục <code>E:/flight-data/exports</code>, dùng cho báo cáo và dashboard này.</small></h2>
+    <div class="panel"><div class="tbl"><table id="tblFiles"></table></div></div>
+    <p class="sub">Nguồn: Expedia (Kaggle dilwong/flightprices) · OpenFlights · thư viện holidays · Open-Meteo · EIA · BLS · DOT Consumer Airfare Report · BTS Average Fare.</p>
+  </section>
+  <footer id="foot"></footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const D = /*__DATA__*/null;
+const nf = (v, d = 0) => v == null || isNaN(v) ? "–" : Number(v).toLocaleString("vi-VN", { minimumFractionDigits: d, maximumFractionDigits: d });
+const usd = v => "$" + nf(v, 0);
+const pct = (v, d = 1) => (v > 0 ? "+" : "") + nf(v, d) + "%";
+const $ = id => document.getElementById(id);
+const DOW = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+const charts = [];
+
+function tok() {
+  const s = getComputedStyle(document.documentElement);
+  const g = n => s.getPropertyValue(n).trim();
+  return { ink: g("--ink"), ink2: g("--ink-2"), muted: g("--muted"), line: g("--line"), surface: g("--surface"),
+           a: g("--accent"), u: g("--urgent"), s3: g("--s3"), s4: g("--s4") };
+}
+function alpha(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; }
+
+function base(t, extra = {}) {
+  return Object.assign({
+    responsive: true, maintainAspectRatio: false, animation: false,
+    interaction: { mode: "index", intersect: false },
+    plugins: { legend: { labels: { color: t.ink2, boxWidth: 12, boxHeight: 2, font: { family: "IBM Plex Sans" } } },
+               tooltip: { backgroundColor: t.surface, titleColor: t.ink, bodyColor: t.ink2, borderColor: t.line, borderWidth: 1,
+                          titleFont: { family: "IBM Plex Mono" }, bodyFont: { family: "IBM Plex Mono" }, padding: 10 } },
+    scales: { x: { grid: { display: false }, ticks: { color: t.muted, font: { family: "IBM Plex Mono", size: 11 } }, border: { color: t.line } },
+              y: { grid: { color: t.line }, ticks: { color: t.muted, font: { family: "IBM Plex Mono", size: 11 } }, border: { display: false } } }
+  }, extra);
+}
+function mk(id, cfg) { const c = new Chart($(id), cfg); charts.push(c); return c; }
+function bar(t, color) { return { backgroundColor: color, borderRadius: 4, borderSkipped: "start", maxBarThickness: 28 }; }
+function table(id, cols, rows, bestFn) {
+  const h = "<thead><tr>" + cols.map(c => `<th class="${c.n ? "n" : ""}">${c.h}</th>`).join("") + "</tr></thead>";
+  const b = rows.map(r => `<tr class="${bestFn && bestFn(r) ? "best" : ""}">` +
+    cols.map(c => `<td class="${c.n ? "n" : ""}">${c.f ? c.f(r[c.k], r) : r[c.k]}</td>`).join("") + "</tr>").join("");
+  $(id).innerHTML = h + "<tbody>" + b + "</tbody>";
+}
+
+function staticParts() {
+  const k = D.kpi, w = D.windows, som = w.find(x => x.booking_window.startsWith("3")).median_fare;
+  const rush = w.find(x => x.booking_window.startsWith("1")).median_fare;
+  const best = D.models.filter(m => !m.model.startsWith("Baseline")).sort((a, b) => a.MAE - b.MAE)[0];
+  const bt = D.backtest[0], ys = D.yearSummary, y27 = ys.find(r => r.year == 2027);
+  $("kpis").innerHTML = [
+    [nf(k.so_ve / 1e6, 1) + " tr", "vé đã phân tích (Spark)"], [nf(k.so_tuyen), "tuyến bay, 16 sân bay"],
+    [usd(k.gia_trung_vi), "giá trung vị một chiều 2022"], [pct((rush / som - 1) * 100, 0), "đặt 1–7 ngày so với 31–60 ngày", "urgent"],
+    [nf(best["MAPE_%"], 1) + "%", "sai số MAPE tốt nhất T9–T10/2022", "accent"],
+    [nf(bt["MAPE_%"], 1) + "%", "sai số dự báo 2023 (theo tuyến × quý)"],
+    [y27 ? pct(y27["% so với 2022"], 0) : "–", "giá 2027 dự báo so với 2022 (cùng tháng 4–11)"],
+    [nf(D.ablation[0]["MAPE_%"], 1) + "% → " + nf(D.ablation[1]["MAPE_%"], 1) + "%", "MAPE khi thêm nguồn ngoài vào mô hình", "accent"],
+  ].map(([v, l, c]) => `<div class="kpi"><span class="v ${c || ""}">${v}</span><span class="l">${l}</span></div>`).join("");
+
+  table("tblWindows", [{ h: "Nhóm", k: "booking_window", f: v => v.slice(3) }, { h: "Số vé", k: "n", n: 1, f: v => nf(v / 1e6, 1) + " tr" },
+    { h: "Trung vị", k: "median_fare", n: 1, f: usd }, { h: "Chênh", k: "median_fare", n: 1, f: v => `<span class="pill ${v > som ? "up" : ""}">${pct((v / som - 1) * 100)}</span>` }], w);
+  $("windowNote").textContent = `Đi gấp trong 1 tuần đắt hơn đặt sớm khoảng ${nf((rush / som - 1) * 100, 0)}% (giá trung vị ${usd(rush)} so với ${usd(som)}).`;
+
+  const sel = D.selection;
+  $("selected").innerHTML = `<p class="sub" style="margin:4px 0 6px">${sel.numeric.length} biến số + ${sel.categorical.length} biến phân loại (|r| ≥ 0,05 hoặc η ≥ 0,10, bỏ biến trùng thông tin)</p>` +
+    [...sel.numeric, ...sel.categorical].map(f => `<span class="pill" style="margin:0 4px 4px 0">${f}</span>`).join("");
+
+  table("tblModels", [{ h: "Mô hình", k: "model" }, { h: "MAE", k: "MAE", n: 1, f: v => usd(v) }, { h: "RMSE", k: "RMSE", n: 1, f: v => usd(v) },
+    { h: "MAPE", k: "MAPE_%", n: 1, f: v => nf(v, 1) + "%" }, { h: "R²", k: "R2", n: 1, f: v => nf(v, 3) }, { h: "Huấn luyện", k: "train_seconds", n: 1, f: v => nf(v, 0) + " s" }],
+    D.models, r => r.model === best.model);
+  table("tblAbl", [{ h: "Phiên bản", k: "model", f: v => v.split("—")[1] || v }, { h: "MAE", k: "MAE", n: 1, f: usd },
+    { h: "MAPE", k: "MAPE_%", n: 1, f: v => nf(v, 1) + "%" }, { h: "R²", k: "R2", n: 1, f: v => nf(v, 3) }], D.ablation, r => r.model.includes("có tích hợp"));
+  table("tblErrW", [{ h: "Nhóm", k: "booking_window", f: v => v.slice(3) }, { h: "Thực tế", k: "gia_thuc_te_tb", n: 1, f: usd },
+    { h: "Dự đoán", k: "gia_du_doan_tb", n: 1, f: usd }, { h: "MAPE", k: "MAPE_%", n: 1, f: v => nf(v, 1) + "%" }], D.errWindow);
+  $("testSub").textContent = `Mô hình ${best.model}, mẫu 5% các chuyến bay 01/09 → 31/10/2022`;
+
+  table("tblBt", [{ h: "Mô hình", k: "model" }, { h: "MAPE", k: "MAPE_%", n: 1, f: v => nf(v, 1) + "%" },
+    { h: "MAE", k: "MAE_USD", n: 1, f: usd }, { h: "Lệch", k: "Bias_%", n: 1, f: v => pct(v) }], D.backtest, (r) => r === D.backtest[0]);
+  table("tblV24", [{ h: "Phiên bản", k: "model" }, { h: "MAPE", k: "MAPE_%", n: 1, f: v => nf(v, 1) + "%" }, { h: "Lệch", k: "Bias_%", n: 1, f: v => pct(v) }],
+    D.valid24, r => r.model.startsWith("Quy đổi CPI đã hiệu chỉnh"));
+  table("tblYear", [{ h: "Năm", k: "year" }, { h: "Giá Expedia TB", k: "Giá Expedia TB (USD)", n: 1, f: usd },
+    { h: "Giá vé thực bán TB", k: "Giá vé thực bán TB (USD)", n: 1, f: usd },
+    { h: "So với 2022", k: "% so với 2022", n: 1, f: (v, r) => r.year == 2022 ? "–" : `<span class="pill ${v > 0 ? "up" : "good"}">${pct(v)}</span>` },
+    { h: "Loại", k: "year", f: v => v == 2022 ? "Thực tế" : (v <= 2025 ? "Ước tính theo CPI thực tế" : (v == 2026 ? "Thực tế đến " + D.meta.cpi_actual_until.slice(5) + "/2026 + dự báo" : "Dự báo")) }], ys);
+  table("tblFiles", [{ h: "File", k: "file", f: v => `<span class="mono">${v}</span>` }, { h: "Số dòng", k: "rows", n: 1, f: v => nf(v) }, { h: "KB", k: "kb", n: 1, f: v => nf(v, 1) }], D.files);
+  $("foot").textContent = `Mô hình dự báo CPI: ${D.meta.cpi_forecast_model}. Hệ số quy đổi Expedia → giá vé thực bán (DOT): ${nf(D.meta.K_expedia_to_dot, 3)}. Hệ số hiệu chỉnh từ backtest 2023: ${nf(D.meta.bias_factor_2023, 3)}.`;
+
+  const routes = Object.keys(D.routeFare).sort((a, b) => (D.routeN[b] || 0) - (D.routeN[a] || 0));
+  $("selRoute").innerHTML = routes.map(r => `<option>${r}</option>`).join("");
+  $("selMonth").innerHTML = D.months.filter(m => m >= "2023-01").map(m => `<option value="${m}">${m.slice(5)}/${m.slice(0, 4)}</option>`).join("");
+  $("selMonth").value = "2027-07";
+}
+
+function draw() {
+  charts.splice(0).forEach(c => c.destroy());
+  const t = tok();
+  Chart.defaults.font.family = "IBM Plex Sans";
+
+  const b = D.booking;
+  $("curveSub").textContent = `${nf(D.kpi.so_ve / 1e6, 1)} triệu vé, ngày bay 17/04 → 19/11/2022`;
+  mk("chCurve", { type: "line", data: { labels: b.map(r => r.days_before), datasets: [
+    { label: "Khoảng 25%–75%", data: b.map(r => r.p75_fare), borderWidth: 0, pointRadius: 0, backgroundColor: alpha(t.a, .14), fill: "+1" },
+    { label: "_p25", data: b.map(r => r.p25_fare), borderWidth: 0, pointRadius: 0, fill: false },
+    { label: "Giá trung vị", data: b.map(r => r.median_fare), borderColor: t.a, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5 }] },
+    options: base(t, { plugins: { ...base(t).plugins, legend: { labels: { ...base(t).plugins.legend.labels, filter: i => !i.text.startsWith("_") } } },
+      scales: { x: { ...base(t).scales.x, reverse: true, title: { display: true, text: "Số ngày đặt trước ngày bay", color: t.muted } },
+                y: { ...base(t).scales.y, ticks: { ...base(t).scales.y.ticks, callback: v => "$" + v } } } }) });
+
+  const pa = [...D.premAirline].sort((a, b) => b["premium_rat_gap_%"] - a["premium_rat_gap_%"]);
+  mk("chPremAir", { type: "bar", data: { labels: pa.map(r => r.airline_name), datasets: [{ label: "Đội giá 1–7 ngày (%)", data: pa.map(r => r["premium_rat_gap_%"]), ...bar(t, t.u) }] },
+    options: base(t, { indexAxis: "y", interaction: { mode: "nearest", intersect: true }, plugins: { ...base(t).plugins, legend: { display: false } },
+      scales: { x: { ...base(t).scales.y, ticks: { ...base(t).scales.y.ticks, callback: v => v + "%" } }, y: { ...base(t).scales.x } } }) });
+
+  const pr = D.premRoute, rr = [...pr.slice(0, 8), ...pr.slice(-8)];
+  mk("chPremRoute", { type: "bar", data: { labels: rr.map(r => r.route), datasets: [{ label: "Đội giá 1–7 ngày (%)", data: rr.map(r => r["premium_rat_gap_%"]),
+    backgroundColor: rr.map((r, i) => i < 8 ? t.a : t.u), borderRadius: 4, maxBarThickness: 18 }] },
+    options: base(t, { indexAxis: "y", interaction: { mode: "nearest", intersect: true }, plugins: { ...base(t).plugins, legend: { display: false } },
+      scales: { x: { ...base(t).scales.y, ticks: { ...base(t).scales.y.ticks, callback: v => v + "%" } }, y: { ...base(t).scales.x, ticks: { ...base(t).scales.x.ticks, font: { family: "IBM Plex Mono", size: 10 } } } } }) });
+
+  const cr = [...D.corr].sort((a, b) => b.pearson_fare - a.pearson_fare);
+  mk("chCorr", { type: "bar", data: { labels: cr.map(r => r.feature), datasets: [{ label: "Pearson r", data: cr.map(r => r.pearson_fare),
+    backgroundColor: cr.map(r => r.pearson_fare >= 0 ? t.u : t.a), borderRadius: 3, maxBarThickness: 14 }] },
+    options: base(t, { indexAxis: "y", interaction: { mode: "nearest", intersect: true }, plugins: { ...base(t).plugins, legend: { display: false } },
+      scales: { x: { ...base(t).scales.y }, y: { ...base(t).scales.x, ticks: { ...base(t).scales.x.ticks, autoSkip: false, font: { family: "IBM Plex Mono", size: 10 } } } } }) });
+
+  const eta = Object.entries(D.eta).filter(([k]) => k !== "fareBasisCode");
+  mk("chEta", { type: "bar", data: { labels: eta.map(e => e[0]), datasets: [{ label: "η", data: eta.map(e => e[1]), ...bar(t, t.s3) }] },
+    options: base(t, { indexAxis: "y", interaction: { mode: "nearest", intersect: true }, plugins: { ...base(t).plugins, legend: { display: false } },
+      scales: { x: { ...base(t).scales.y, min: 0 }, y: { ...base(t).scales.x, ticks: { ...base(t).scales.x.ticks, font: { family: "IBM Plex Mono", size: 10 } } } } }) });
+
+  const small = (id, labels, data, colors) => mk(id, { type: "bar", data: { labels, datasets: [{ label: "Giá trung vị", data, backgroundColor: colors || t.a, borderRadius: 3, maxBarThickness: 26 }] },
+    options: base(t, { interaction: { mode: "nearest", intersect: false, axis: "x" }, plugins: { ...base(t).plugins, legend: { display: false } },
+      scales: { x: base(t).scales.x, y: { ...base(t).scales.y, ticks: { ...base(t).scales.y.ticks, callback: v => "$" + v } } } }) });
+  small("chDow", D.dow.map(r => DOW[r.day_of_week - 1]), D.dow.map(r => r.median_fare));
+  small("chHour", D.hour.map(r => r.dep_hour + "h"), D.hour.map(r => r.median_fare));
+  small("chStops", D.stops.map(r => r.num_stops == 0 ? "Bay thẳng" : r.num_stops + " dừng"), D.stops.map(r => r.median_fare));
+  small("chHol", D.holiday.map(r => r.days_to_holiday), D.holiday.map(r => r.median_fare), D.holiday.map(r => r.days_to_holiday == 0 ? t.u : t.a));
+
+  const td = D.testDay;
+  mk("chTest", { type: "line", data: { labels: td.map(r => r.flightDate.slice(5)), datasets: [
+    { label: "Thực tế", data: td.map(r => r.thuc_te), borderColor: t.a, borderWidth: 2, pointRadius: 0 },
+    { label: "Dự đoán", data: td.map(r => r.du_doan), borderColor: t.u, borderWidth: 2, pointRadius: 0 }] },
+    options: base(t, { scales: { x: base(t).scales.x, y: { ...base(t).scales.y, ticks: { ...base(t).scales.y.ticks, callback: v => "$" + v } } } }) });
+
+  const imp = Object.entries(D.importance).slice(0, 12);
+  $("impSub").textContent = "Gradient-boosted / cây quyết định: 12 chỉ số đầu";
+  mk("chImp", { type: "bar", data: { labels: imp.map(e => e[0]), datasets: [{ label: "Mức quan trọng", data: imp.map(e => e[1]), ...bar(t, t.a) }] },
+    options: base(t, { indexAxis: "y", interaction: { mode: "nearest", intersect: true }, plugins: { ...base(t).plugins, legend: { display: false } },
+      scales: { x: { ...base(t).scales.y, min: 0 }, y: { ...base(t).scales.x, ticks: { ...base(t).scales.x.ticks, autoSkip: false, font: { family: "IBM Plex Mono", size: 10 } } } } }) });
+
+  const c = D.cpi, last = D.meta.cpi_actual_until;
+  $("cpiSub").textContent = `BLS, 1982–84 = 100. Thực tế đến ${last.slice(5)}/${last.slice(0, 4)}; sau đó dự báo bằng ${D.meta.cpi_forecast_model} (khoảng tin cậy 80%).`;
+  const isF = r => r.loai === "dự báo";
+  mk("chCpi", { type: "line", data: { labels: c.map(r => r.date), datasets: [
+    { label: "Cận trên 80%", data: c.map(r => isF(r) ? r.hi80 : null), borderWidth: 0, pointRadius: 0, backgroundColor: alpha(t.u, .15), fill: "+1" },
+    { label: "Cận dưới 80%", data: c.map(r => isF(r) ? r.lo80 : null), borderWidth: 0, pointRadius: 0, fill: false },
+    { label: "Thực tế", data: c.map(r => isF(r) ? null : r.cpi_airfare), borderColor: t.a, borderWidth: 2, pointRadius: 0 },
+    { label: "Dự báo", data: c.map((r, i) => isF(r) || (c[i + 1] && isF(c[i + 1])) ? r.cpi_airfare : null), borderColor: t.u, borderWidth: 2, borderDash: [5, 3], pointRadius: 0 }] },
+    options: base(t, { plugins: { ...base(t).plugins, legend: { labels: { ...base(t).plugins.legend.labels, filter: i => !i.text.startsWith("Cận dưới") } } },
+      scales: { x: { ...base(t).scales.x, ticks: { ...base(t).scales.x.ticks, maxTicksLimit: 14 } }, y: base(t).scales.y } }) });
+
+  const q = D.backtestQ, bestBt = D.backtest[0].model;
+  mk("chBtQ", { type: "bar", data: { labels: q.map(r => "Q" + r.quarter), datasets: [
+    { label: "Giá 2022", data: q.map(r => r.fare_2022), ...bar(t, alpha(t.muted, .6)) },
+    { label: "Dự báo (" + bestBt + ")", data: q.map(r => r[bestBt]), ...bar(t, t.u) },
+    { label: "Thực tế 2023", data: q.map(r => r.actual), ...bar(t, t.a) }] },
+    options: base(t, { scales: { x: base(t).scales.x, y: { ...base(t).scales.y, ticks: { ...base(t).scales.y.ticks, callback: v => "$" + v } } } }) });
+
+  plan(t);
+}
+
+function plan(t = tok()) {
+  const r = $("selRoute").value, m = $("selMonth").value;
+  const mi = D.months.indexOf(m), level = D.routeFare[r][mi];
+  const m22 = "2022-" + m.slice(5), i22 = D.months.indexOf(m22), level22 = i22 >= 0 ? D.routeFare[r][i22] : null;
+  const curve = D.curve[r] || [];
+  const at = d => level * (curve[d - 1] || 1);
+  const minD = curve.length ? curve.indexOf(Math.min(...curve.slice(6))) + 1 : null;
+  const fc = m > D.lastActual;
+  $("board").innerHTML = [
+    [usd(level), "giá trung bình tháng " + m.slice(5) + "/" + m.slice(0, 4) + (fc ? " (dự báo)" : " (ước tính)"), "now"],
+    [level22 ? usd(level22) : "–", "cùng tháng năm 2022 (Expedia)"],
+    [usd(at(45)), "nếu đặt trước 45 ngày"], [usd(at(3)), "nếu đặt trước 3 ngày", "rush"],
+    [minD ? minD + " ngày" : "–", "thời điểm đặt rẻ nhất (≥ 7 ngày)"],
+  ].map(([v, l, c]) => `<div class="${c || ""}"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("");
+  const days = curve.map((_, i) => i + 1);
+  const old = charts.findIndex(c => c.canvas.id === "chPlan");
+  if (old >= 0) charts.splice(old, 1)[0].destroy();
+  mk("chPlan", { type: "line", data: { labels: days, datasets: [
+    { label: `Bay ${m.slice(5)}/${m.slice(0, 4)}`, data: days.map(at), borderColor: t.u, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5 },
+    ...(level22 ? [{ label: `Bay ${m.slice(5)}/2022 (thực tế)`, data: days.map(d => level22 * curve[d - 1]), borderColor: t.muted, borderDash: [5, 3], borderWidth: 2, pointRadius: 0 }] : [])] },
+    options: base(t, { scales: { x: { ...base(t).scales.x, reverse: true, title: { display: true, text: "Số ngày đặt trước ngày bay", color: t.muted } },
+      y: { ...base(t).scales.y, ticks: { ...base(t).scales.y.ticks, callback: v => "$" + v } } } }) });
+}
+
+staticParts();
+draw();
+$("selRoute").addEventListener("change", () => plan());
+$("selMonth").addEventListener("change", () => plan());
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+</script>
