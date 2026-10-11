@@ -3,9 +3,16 @@
 Chạy:  python flight-price-analysis/make_samples.py
 """
 import os
+import sys
 
-SRC = "D:/TH-PTDLL/data/flightprices/itineraries.csv"
-OUT_DIR = "D:/TH-PTDLL/data/flightprices"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+from common import CSV_PATH, DATA_DIR
+
+SRC = CSV_PATH
+OUT_DIR = f"{DATA_DIR}/samples"
+os.makedirs(OUT_DIR, exist_ok=True)
 HEAD_ROWS = 1_000          # 1.000 dòng đầu tiên
 EVERY_N = 820              # lấy 1 dòng mỗi 820 dòng -> khoảng 100.000 dòng trải đều cả file
 
