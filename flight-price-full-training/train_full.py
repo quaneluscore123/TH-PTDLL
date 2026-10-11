@@ -15,9 +15,12 @@ if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8")
 
 import time
+import json
 import argparse
 import pandas as pd
 import numpy as np
+import lightgbm as lgb
+import joblib
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from common_full import *
@@ -30,8 +33,9 @@ from pyspark.ml.regression import LinearRegression, DecisionTreeRegressor, Rando
 def parse_args():
     parser = argparse.ArgumentParser(description="Huấn luyện mô hình giá vé máy bay trên dữ liệu lớn (32GB RAM)")
     parser.add_argument("--fraction", type=float, default=TRAIN_FRACTION,
-                        help="Tỷ lệ lấy mẫu từ Silver: 1.0 (toàn bộ 82,1M dòng), 0.5 (50%), 0.2 (20%)")
+                        help="Tỷ lệ lấy mẫu từ Silver: 1.0 (toàn bộ 82,1M dòng), 0.5 (50%%), 0.2 (20%%)")
     parser.add_argument("--skip-gbt", action="store_true", help="Bỏ qua GBT nếu chỉ muốn chạy nhanh Linear & Random Forest")
+    parser.add_argument("--skip-lgb", action="store_true", help="Bỏ qua LightGBM")
     return parser.parse_args()
 
 
@@ -202,6 +206,57 @@ def main():
         imp = pd.Series(tree_model.featureImportances.toArray(), index=feat_names).sort_values(ascending=False)
         imp.to_csv(f"{EXPORTS_FULL}/feature_importance_full.csv", header=["importance"])
 
+    # 5. LightGBM Regressor (Tối ưu RAM 32GB)
+    lgb_algo = None
+    feature_cols = [c for c in num_cols + cat_cols if c in train_df.columns]
+    if not args.skip_lgb:
+        total_steps = "5/5" if not args.skip_gbt else "4/4"
+        print(f"\n--- {total_steps}. Huấn luyện LightGBM Regressor ---")
+        t0 = time.time()
+
+        # Đảm bảo an toàn bộ nhớ cho 32GB RAM khi JVM đã chiếm 24GB:
+        # Lấy mẫu tối đa 3 triệu dòng cho pandas
+        if n_train > 3_000_000:
+            lgb_train_sample = train_df.sample(fraction=float(3_000_000 / n_train), seed=SEED)
+        else:
+            lgb_train_sample = train_df
+
+        train_lgb_pdf = lgb_train_sample.select(*feature_cols, "label").toPandas()
+        for c in cat_cols:
+            if c in train_lgb_pdf.columns:
+                train_lgb_pdf[c] = train_lgb_pdf[c].astype("category")
+
+        lgb_algo = lgb.LGBMRegressor(
+            n_estimators=100,
+            learning_rate=0.08,
+            num_leaves=63,
+            subsample=0.8,
+            colsample_bytree=0.8,
+            random_state=SEED,
+            n_jobs=-1,
+            verbose=-1
+        )
+        lgb_algo.fit(train_lgb_pdf[feature_cols], train_lgb_pdf["label"])
+        lgb_train_time = time.time() - t0
+
+        # Đánh giá trên tập kiểm tra (mẫu 1M dòng nếu n_test lớn để tối ưu thời gian)
+        test_eval_df = test_df if n_test <= 1_000_000 else test_df.sample(fraction=float(1_000_000 / n_test), seed=SEED)
+        test_lgb_pdf = test_eval_df.select("totalFare", *feature_cols).toPandas()
+        for c in cat_cols:
+            if c in test_lgb_pdf.columns:
+                test_lgb_pdf[c] = test_lgb_pdf[c].astype("category")
+
+        test_lgb_pdf["prediction"] = lgb_algo.predict(test_lgb_pdf[feature_cols])
+        pred_lgb_sdf = spark.createDataFrame(test_lgb_pdf[["totalFare", "prediction"]])
+        res_lgb = evaluate_predictions(pred_lgb_sdf, "LightGBM (Tối ưu RAM 32GB)", lgb_train_time, test_mean_fare)
+        print(res_lgb)
+        results.append(res_lgb)
+
+        # Lưu model LightGBM
+        os.makedirs(MODELS_FULL, exist_ok=True)
+        joblib.dump(lgb_algo, f"{MODELS_FULL}/best_model_lgb.joblib")
+        lgb_algo.booster_.save_model(f"{MODELS_FULL}/best_model_lgb.txt")
+
     # Xuất bảng kết quả
     res_df = pd.DataFrame(results).set_index("model")
     res_path = f"{EXPORTS_FULL}/model_comparison_full.csv"
@@ -212,9 +267,17 @@ def main():
 
     # Lưu mô hình tốt nhất
     best_name = res_df.drop(index=res_df.index[0])["MAE"].idxmin()
-    best_pipe = model_gbt if ("GBT" in best_name and not args.skip_gbt) else (model_rf if "Random Forest" in best_name else model_lr)
+    if "LightGBM" in best_name and lgb_algo is not None:
+        imp = pd.Series(lgb_algo.feature_importances_, index=feature_cols).sort_values(ascending=False)
+        imp.to_csv(f"{EXPORTS_FULL}/feature_importance_full.csv", header=["importance"])
+        print(f"Đã cập nhật feature importance từ LightGBM: {EXPORTS_FULL}/feature_importance_full.csv")
+
+    spark_models = [m for m in res_df.index if m != res_df.index[0] and "LightGBM" not in m]
+    best_spark_name = res_df.loc[spark_models]["MAE"].idxmin() if spark_models else "Random Forest"
+    best_pipe = model_gbt if ("GBT" in best_spark_name and not args.skip_gbt) else (model_rf if "Random Forest" in best_spark_name else model_lr)
     best_pipe.write().overwrite().save(f"{MODELS_FULL}/best_model_full")
-    print(f"Đã lưu mô hình tốt nhất ({best_name}) tại: {MODELS_FULL}/best_model_full")
+    print(f"Đã lưu mô hình tốt nhất Spark ({best_spark_name}) tại: {MODELS_FULL}/best_model_full")
+    print(f"Mô hình đạt độ chính xác cao nhất tổng thể: {best_name}")
 
     spark.stop()
 

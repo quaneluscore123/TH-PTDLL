@@ -20,6 +20,8 @@ import time
 import json
 import pandas as pd
 import numpy as np
+import lightgbm as lgb
+import joblib
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from common_full import *
@@ -325,6 +327,45 @@ def step4_train_ml(spark):
     print(res_rf)
     results.append(res_rf)
 
+    # 4. LightGBM Regressor (Tối ưu cho 24 GB RAM)
+    print("\n[ML 4/4] Đang huấn luyện LightGBM Regressor...")
+    t0 = time.time()
+    feature_cols = [c for c in num_cols + cat_cols if c in train_df.columns]
+    lgb_sample = train_df.sample(fraction=float(min(1.0, 3_000_000 / n_train)), seed=SEED) if n_train > 3_000_000 else train_df
+    train_lgb_pdf = lgb_sample.select(*feature_cols, "label").toPandas()
+    for c in cat_cols:
+        if c in train_lgb_pdf.columns:
+            train_lgb_pdf[c] = train_lgb_pdf[c].astype("category")
+
+    lgb_algo = lgb.LGBMRegressor(
+        n_estimators=100,
+        learning_rate=0.08,
+        num_leaves=63,
+        subsample=0.8,
+        colsample_bytree=0.8,
+        random_state=SEED,
+        n_jobs=-1,
+        verbose=-1
+    )
+    lgb_algo.fit(train_lgb_pdf[feature_cols], train_lgb_pdf["label"])
+    lgb_secs = time.time() - t0
+
+    test_eval_df = test_df if n_test <= 1_000_000 else test_df.sample(fraction=float(1_000_000 / n_test), seed=SEED)
+    test_lgb_pdf = test_eval_df.select("totalFare", *feature_cols).toPandas()
+    for c in cat_cols:
+        if c in test_lgb_pdf.columns:
+            test_lgb_pdf[c] = test_lgb_pdf[c].astype("category")
+    test_lgb_pdf["prediction"] = lgb_algo.predict(test_lgb_pdf[feature_cols])
+    pred_lgb_sdf = spark.createDataFrame(test_lgb_pdf[["totalFare", "prediction"]])
+    res_lgb = evaluate(pred_lgb_sdf, "LightGBM (Tối ưu 24GB RAM)", lgb_secs)
+    print(res_lgb)
+    results.append(res_lgb)
+
+    # Lưu mô hình LightGBM
+    os.makedirs(MODELS_FULL, exist_ok=True)
+    joblib.dump(lgb_algo, f"{MODELS_FULL}/best_model_lgb.joblib")
+    lgb_algo.booster_.save_model(f"{MODELS_FULL}/best_model_lgb.txt")
+
     # Xuất kết quả
     res_df = pd.DataFrame(results).set_index("model")
     res_path = f"{EXPORTS_FULL}/model_comparison_full.csv"
@@ -336,8 +377,15 @@ def step4_train_ml(spark):
     print(f"\nĐã lưu kết quả tại: {res_path}")
 
     # Lưu mô hình tốt nhất
+    best_name = res_df.drop(index=res_df.index[0])["MAE"].idxmin()
+    if "LightGBM" in best_name:
+        imp = pd.Series(lgb_algo.feature_importances_, index=feature_cols).sort_values(ascending=False)
+        imp.to_csv(f"{EXPORTS_FULL}/feature_importance_full.csv", header=["importance"])
+        print(f"Đã cập nhật feature importance từ LightGBM: {EXPORTS_FULL}/feature_importance_full.csv")
+
     model_rf.write().overwrite().save(f"{MODELS_FULL}/best_model_full")
-    print(f"Đã lưu mô hình tốt nhất tại: {MODELS_FULL}/best_model_full")
+    print(f"Đã lưu mô hình tốt nhất Spark (Random Forest) tại: {MODELS_FULL}/best_model_full")
+    print(f"Mô hình đạt độ chính xác cao nhất tổng thể: {best_name}")
 
 
 def main():

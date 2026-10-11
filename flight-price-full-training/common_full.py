@@ -50,8 +50,13 @@ if not CSV_PATH:
 
 # --- 4. Thư mục lưu trữ chính (Ưu tiên ổ F: có 95 GB trống) ---
 def _pick_best_data_dir():
-    candidates = ["F:/flight-data", "C:/flight-data", "D:/flight-data"]
-    best_dir = "F:/flight-data"
+    candidates = ["C:/flight-data", "F:/flight-data", "D:/flight-data"]
+    # 1. Ưu tiên thư mục đã có sẵn dữ liệu tầng Silver đã tiền xử lý
+    for c in candidates:
+        if os.path.exists(f"{c}/silver/itineraries"):
+            return c
+    # 2. Nếu chưa có, chọn ổ đĩa có dung lượng trống lớn nhất (> 10GB)
+    best_dir = "C:/flight-data"
     best_free = 0
     for c in candidates:
         drive = os.path.splitdrive(c)[0] + "/"
@@ -80,8 +85,8 @@ TRAIN_FRACTION = float(os.environ.get("FULL_TRAIN_FRACTION", "1.0"))
 SEED = 42
 
 
-def get_spark_32gb(app_name="flight-price-full-32gb", driver_memory="24g"):
-    """Khởi tạo SparkSession tối ưu hóa tối đa cho 32 GB RAM (cấp phát 24 GB) và i5-14500 (20 luồng)."""
+def get_spark_32gb(app_name="flight-price-full-32gb", driver_memory="20g"):
+    """Khởi tạo SparkSession tối ưu hóa tối đa cho 32 GB RAM (20 GB JVM Heap + 12 GB cho LightGBM/OS) và i5-14500 (20 luồng)."""
     os.environ.setdefault("HADOOP_HOME", HADOOP_HOME)
     os.environ["PYSPARK_PYTHON"] = sys.executable
     os.environ["PYSPARK_DRIVER_PYTHON"] = sys.executable

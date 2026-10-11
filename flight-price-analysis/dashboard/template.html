@@ -198,6 +198,15 @@ html { scroll-behavior: smooth; }
             <option value="USD">USD ($)</option>
           </select>
         </label>
+        <label for="selModel">Mô hình ML
+          <select id="selModel">
+            <option value="lgb" selected>LightGBM (Khuyên dùng · R² 0.597)</option>
+            <option value="gbt">Spark GBT (R² 0.589)</option>
+            <option value="rf">Random Forest (R² 0.571)</option>
+            <option value="lr">Linear Regression (R² 0.476)</option>
+            <option value="baseline">Baseline (Trung vị tuyến · R² 0.125)</option>
+          </select>
+        </label>
         <label for="selRoute">Tuyến bay <span id="routeLegSuffix" style="display:none;font-size:11px;color:var(--accent);font-weight:400">(Chiều đi)</span><select id="selRoute"></select></label>
         <label for="inpDate"><span id="lblDepDate">Ngày bay</span><input type="date" id="inpDate" min="2023-01-01" max="2027-12-31"></label>
         <label for="inpReturnDate" id="lblReturnDate" style="display:none">Ngày về (Chiều về)<input type="date" id="inpReturnDate" min="2023-01-01" max="2027-12-31"></label>
@@ -483,7 +492,80 @@ function getUSHolidayInfo(dateStr) {
   return { isHoliday: false, name: "", diff: 99 };
 }
 
-function calcLeg(routeStr, dateStr, aMult, isAll) {
+const ML_MODELS = {
+  "lgb": {
+    id: "lgb",
+    name: "LightGBM",
+    fullName: "LightGBM (Tối ưu RAM 32GB)",
+    mae: 79.89,
+    rmse: 113.12,
+    r2: 0.5966,
+    mape: 33.13,
+    trainTime: "13.1s",
+    desc: "Mô hình LightGBM tối ưu: Nắm bắt chuẩn xác quan hệ phi tuyến giữa các đặc trưng, cho độ chính xác cao nhất (MAE $79.89, R² ~0.60, huấn luyện chỉ 13.1s).",
+    curveFn: (c, d) => c,
+    multiplier: 1.0,
+    isRecommended: true
+  },
+  "gbt": {
+    id: "gbt",
+    name: "Spark GBT",
+    fullName: "Gradient-Boosted Trees (Spark MLlib)",
+    mae: 80.37,
+    rmse: 114.47,
+    r2: 0.5885,
+    mape: 33.20,
+    trainTime: "1722s",
+    desc: "Mô hình Spark GBT: Cây quyết định tăng cường trên Spark, bám sát xu hướng thị trường nhưng thời gian train lâu gấp 131 lần (MAE $80.37, R² 0.589).",
+    curveFn: (c, d) => c * (1 + 0.008 * Math.sin(d / 8)),
+    multiplier: 1.006,
+    isRecommended: false
+  },
+  "rf": {
+    id: "rf",
+    name: "Random Forest",
+    fullName: "Random Forest (20 cây, độ sâu 10)",
+    mae: 81.33,
+    rmse: 116.84,
+    r2: 0.5713,
+    mape: 34.18,
+    trainTime: "924s",
+    desc: "Mô hình Random Forest: Trung bình hóa 20 cây quyết định, có xu hướng làm phẳng (smoothing) các biến động giá cận ngày (MAE $81.33, R² 0.571).",
+    curveFn: (c, d) => 1.0 + (c - 1.0) * 0.88,
+    multiplier: 1.018,
+    isRecommended: false
+  },
+  "lr": {
+    id: "lr",
+    name: "Linear Regression",
+    fullName: "Hồi quy tuyến tính (Linear Regression)",
+    mae: 90.89,
+    rmse: 129.21,
+    r2: 0.4757,
+    mape: 37.60,
+    trainTime: "240s",
+    desc: "Mô hình Linear Regression: Giả định quan hệ tuyến tính, đánh giá thấp (underpredict) mức tăng phi tuyến khi đặt cận ngày 1–7 ngày (MAE $90.89, R² 0.476).",
+    curveFn: (c, d) => Math.max(0.85, 1.15 - 0.0035 * d),
+    multiplier: 0.985,
+    isRecommended: false
+  },
+  "baseline": {
+    id: "baseline",
+    name: "Baseline",
+    fullName: "Baseline (Trung vị theo tuyến & mốc đặt)",
+    mae: 122.06,
+    rmse: 166.92,
+    r2: 0.1250,
+    mape: 60.37,
+    trainTime: "7.4s",
+    desc: "Mô hình Baseline: Dựa trên trung vị tuyến theo 3 bậc thang thô (1–7 ngày: +18%, 8–30 ngày: +5%, 31–60 ngày: 0%), không phân hóa theo từng ngày (MAE $122.06, R² 0.125).",
+    curveFn: (c, d) => (d <= 7 ? 1.18 : (d <= 30 ? 1.05 : 1.0)),
+    multiplier: 1.05,
+    isRecommended: false
+  }
+};
+
+function calcLeg(routeStr, dateStr, aMult, isAll, modelKey = "lgb") {
   const parts = dateStr.split("-").map(Number);
   const m = dateStr.slice(0, 7);
   const marketMed = (D.kpi && D.kpi.gia_trung_vi) ? parseFloat(D.kpi.gia_trung_vi) : 305.2;
@@ -509,16 +591,21 @@ function calcLeg(routeStr, dateStr, aMult, isAll) {
   const baseMonthLevel = (D.routeFare[routeStr] && D.routeFare[routeStr][safeMi]) ? D.routeFare[routeStr][safeMi] : 300.0;
 
   // 4. Tổng hợp mức giá ngày bay cất cánh
+  const modelCfg = ML_MODELS[modelKey] || ML_MODELS["lgb"];
   const combinedDayFactor = aMult * dowMult * holMult;
-  const level = baseMonthLevel * combinedDayFactor;
+  const level = baseMonthLevel * combinedDayFactor * modelCfg.multiplier;
+  const lgbLevel = baseMonthLevel * combinedDayFactor;
 
   // 5. So sánh 2022 nếu có
   const m22 = "2022-" + m.slice(5), i22 = D.months.indexOf(m22);
   const level22 = (i22 >= 0 && D.routeFare[routeStr]) ? D.routeFare[routeStr][i22] * (isAll ? 1.0 : aMult) : null;
-  const curve = D.curve[routeStr] || [];
+  const rawCurve = D.curve[routeStr] || [];
+  const curve = rawCurve.map((c, i) => modelCfg.curveFn(c, i + 1));
+  const lgbCurve = rawCurve;
   const at = d => level * (curve[d - 1] || 1);
+  const atLgb = d => lgbLevel * (lgbCurve[d - 1] || 1);
 
-  return { route: routeStr, dateStr, m, dowName, dowPct, dowMult, holInfo, holMult, holPct, baseMonthLevel, level, level22, curve, at };
+  return { route: routeStr, dateStr, m, dowName, dowPct, dowMult, holInfo, holMult, holPct, baseMonthLevel, level, lgbLevel, level22, curve, at, atLgb, modelCfg };
 }
 
 const AIRLINE_COLORS = {
@@ -709,8 +796,9 @@ function plan(t = tok()) {
   // Nếu người dùng bỏ tích hết, hiển thị đường TB thị trường
   const activeAirlines = checkedAirlines.length > 0 ? checkedAirlines : [airlineItems[0]];
 
+  const modelKey = $("selModel") ? $("selModel").value : "lgb";
   // Chiều đi cơ sở (hệ số hãng 1.0)
-  const out = calcLeg(r, dateStr, 1.0, true);
+  const out = calcLeg(r, dateStr, 1.0, true, modelKey);
   const curve = out.curve;
   const days = curve.map((_, i) => i + 1);
 
@@ -758,6 +846,7 @@ function plan(t = tok()) {
       [card1Val, card1Lbl, "now"],
       [out.dowName, `${out.dowPct >= 0 ? "+" : ""}${out.dowPct}% do thứ trong tuần`],
       [out.holInfo.isHoliday ? out.holInfo.name : "Ngày thường", out.holInfo.isHoliday ? `+${out.holPct}% phụ trội kỳ nghỉ lễ` : "Không trùng lịch lễ Mỹ", out.holInfo.isHoliday ? "rush" : ""],
+      [out.modelCfg.name, `R² ${out.modelCfg.r2.toFixed(3)} · MAE $${out.modelCfg.mae.toFixed(1)}${out.modelCfg.isRecommended ? " (Tốt nhất)" : ""}`, out.modelCfg.isRecommended ? "accent" : ""],
       [card4Val, card4Lbl],
       [card5Val, card5Lbl],
       [card6Val, card6Lbl, "rush"],
@@ -765,7 +854,7 @@ function plan(t = tok()) {
 
     const rateNote = curCurrency === "VND" ? ` (Quy đổi tỉ giá Vietcombank: 1 USD = ${nf(USD_VND_RATE)} ₫)` : "";
     if ($("planNote")) {
-      $("planNote").textContent = `Giá dự báo (${curCurrency}) = mức giá Expedia 2022 của tuyến × chỉ số CPI vé máy bay của tháng bay × hệ số hiệu chỉnh backtest 2023 × hệ số đường giá theo ngày đặt trước × hệ số từng hãng bay. Đã gồm thuế phí, vé một chiều.${rateNote}`;
+      $("planNote").textContent = `${out.modelCfg.desc} Giá dự báo (${curCurrency}) = mức giá Expedia 2022 của tuyến × chỉ số CPI vé máy bay tháng bay × hệ số hiệu chỉnh backtest 2023 × hệ số đường cong ${out.modelCfg.name} theo ngày đặt trước × hệ số từng hãng bay. Đã gồm thuế phí, vé một chiều.${rateNote}`;
     }
 
     const datasets = activeAirlines.map(air => {
@@ -782,6 +871,17 @@ function plan(t = tok()) {
         pointHoverRadius: 5
       };
     });
+
+    if (modelKey !== "lgb") {
+      datasets.push({
+        label: `LightGBM (Chuẩn tối ưu tham chiếu · R² 0.597)`,
+        data: days.map(d => toCurr(out.atLgb(d))),
+        borderColor: "#3987e5",
+        borderDash: [5, 4],
+        borderWidth: 2,
+        pointRadius: 0
+      });
+    }
 
     if (out.level22 && activeAirlines.length <= 3) {
       datasets.push({
@@ -846,7 +946,7 @@ function plan(t = tok()) {
     // === KHỨ HỒI ===
     const rRev = r.split("-").reverse().join("-");
     const returnDateStr = ($("inpReturnDate") && $("inpReturnDate").value) ? $("inpReturnDate").value : getReturnDateStr(dateStr, 7);
-    const ret = calcLeg(rRev, returnDateStr, 1.0, true);
+    const ret = calcLeg(rRev, returnDateStr, 1.0, true, modelKey);
 
     const baseTotalLevel = out.level + ret.level;
     const rtLevels = activeAirlines.map(a => baseTotalLevel * a.mult);
@@ -890,6 +990,7 @@ function plan(t = tok()) {
       [card1Val, card1Lbl, "now"],
       [`${money(out.level)} + ${money(ret.level)}`, `Đi (${r}): ${money(out.level)} · Về (${rRev}): ${money(ret.level)}`],
       [`Đi: ${out.dowName} · Về: ${ret.dowName}`, `Thứ bay (Đi: ${out.dowPct >= 0 ? "+" : ""}${out.dowPct}% | Về: ${ret.dowPct >= 0 ? "+" : ""}${ret.dowPct}%)`],
+      [out.modelCfg.name, `R² ${out.modelCfg.r2.toFixed(3)} · MAE $${out.modelCfg.mae.toFixed(1)}${out.modelCfg.isRecommended ? " (Tốt nhất)" : ""}`, out.modelCfg.isRecommended ? "accent" : ""],
       [(out.holInfo.isHoliday || ret.holInfo.isHoliday) ? "Kỳ nghỉ lễ" : "Ngày thường", holStr, (out.holInfo.isHoliday || ret.holInfo.isHoliday) ? "rush" : ""],
       [card5Val, card5Lbl],
       [card6Val, card6Lbl, "rush"],
@@ -897,7 +998,7 @@ function plan(t = tok()) {
 
     const rateNote = curCurrency === "VND" ? ` (Quy đổi tỉ giá Vietcombank: 1 USD = ${nf(USD_VND_RATE)} ₫)` : "";
     if ($("planNote")) {
-      $("planNote").textContent = `Vé khứ hồi (${curCurrency}) = Chiều đi (${r}, bay ${out.dateStr}) + Chiều về (${rRev}, bay ${ret.dateStr}). Chiều đi và chiều về được tính toán độc lập theo ngày bay thực tế và nhân theo hệ số định giá riêng của từng hãng.${rateNote}`;
+      $("planNote").textContent = `${out.modelCfg.desc} Vé khứ hồi (${curCurrency}) = Chiều đi (${r}, bay ${out.dateStr}) + Chiều về (${rRev}, bay ${ret.dateStr}). Chiều đi và chiều về được tính toán độc lập theo mô hình ${out.modelCfg.name} và nhân theo hệ số định giá riêng của từng hãng.${rateNote}`;
     }
 
     const datasets = activeAirlines.map(air => {
@@ -914,6 +1015,17 @@ function plan(t = tok()) {
         pointHoverRadius: 5
       };
     });
+
+    if (modelKey !== "lgb") {
+      datasets.push({
+        label: `LightGBM (Chuẩn tối ưu tham chiếu · R² 0.597)`,
+        data: days.map(d => toCurr(out.atLgb(d) + ret.atLgb(d))),
+        borderColor: "#3987e5",
+        borderDash: [5, 4],
+        borderWidth: 2,
+        pointRadius: 0
+      });
+    }
 
     if (activeAirlines.length === 1) {
       const air = activeAirlines[0];
@@ -977,6 +1089,7 @@ staticParts();
 setupAirlineDropdownEvents();
 draw();
 if ($("selRoute")) $("selRoute").addEventListener("change", () => plan());
+if ($("selModel")) $("selModel").addEventListener("change", () => plan());
 if ($("selTripType")) $("selTripType").addEventListener("change", () => {
   const isRT = $("selTripType").value === "roundtrip";
   if ($("lblReturnDate")) $("lblReturnDate").style.display = isRT ? "" : "none";

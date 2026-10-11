@@ -18,6 +18,8 @@ from common import *
 from viz import *
 import pandas as pd, numpy as np
 import matplotlib.pyplot as plt
+import lightgbm as lgb
+import joblib
 from pyspark.sql import functions as F
 from pyspark.ml import Pipeline
 from pyspark.ml.feature import StringIndexer, OneHotEncoder, VectorAssembler, StandardScaler, Imputer
@@ -134,6 +136,39 @@ for name, (algo, linear) in algos.items():
     preds[name], models[name] = pred, model
     print(results[-1], flush=True)
 
+# 5) LightGBM Regressor
+print("\n--- Huấn luyện LightGBM Regressor ---")
+t0 = time.time()
+feature_cols = [c for c in NUM + CAT if c in train.columns]
+train_pdf = train.select(*feature_cols, "label").toPandas()
+test_eval = test.select("flightDate", "days_before", "booking_window", "totalFare", *feature_cols).toPandas()
+
+for c in CAT:
+    if c in train_pdf.columns:
+        train_pdf[c] = train_pdf[c].astype("category")
+        test_eval[c] = test_eval[c].astype("category")
+
+lgb_algo = lgb.LGBMRegressor(
+    n_estimators=100,
+    learning_rate=0.08,
+    num_leaves=63,
+    subsample=0.8,
+    colsample_bytree=0.8,
+    random_state=SEED,
+    n_jobs=-1,
+    verbose=-1
+)
+lgb_algo.fit(train_pdf[feature_cols], train_pdf["label"])
+secs_lgb = time.time() - t0
+
+test_eval["prediction"] = lgb_algo.predict(test_eval[feature_cols])
+pred_lgb = spark.createDataFrame(test_eval[["flightDate", "days_before", "booking_window", "totalFare", "prediction"]])
+res_lgb = evaluate(pred_lgb, "LightGBM", secs_lgb)
+results.append(res_lgb)
+preds["LightGBM"] = pred_lgb
+models["LightGBM"] = lgb_algo
+print(results[-1], flush=True)
+
 res = pd.DataFrame(results).set_index("model")
 res.to_csv(f"{EXPORTS}/05_model_comparison.csv")
 res
@@ -164,10 +199,21 @@ EXTERNAL_COLS = {"is_holiday", "holiday_window", "days_to_holiday", "jet_fuel_us
 EXTERNAL_COLS |= {c for c in NUM if c.startswith(("origin_", "dest_"))}
 num_only = [c for c in NUM if c not in EXTERNAL_COLS]
 cat_only = [c for c in CAT if c not in EXTERNAL_COLS]
-algo, linear = algos[best_name]
-t0 = time.time()
-m_only = Pipeline(stages=feature_stages(num_only, cat_only, linear) + [algo.copy()]).fit(train)
-r_only = evaluate(m_only.transform(test), f"{best_name} — chỉ dữ liệu chuyến bay", time.time() - t0)
+
+if best_name == "LightGBM":
+    t0 = time.time()
+    lgb_only = lgb.LGBMRegressor(n_estimators=100, learning_rate=0.08, num_leaves=63, random_state=SEED, n_jobs=-1, verbose=-1)
+    lgb_only.fit(train_pdf[num_only + cat_only], train_pdf["label"])
+    test_only_df = test_eval[["flightDate", "days_before", "booking_window", "totalFare"]].copy()
+    test_only_df["prediction"] = lgb_only.predict(test_eval[num_only + cat_only])
+    m_only = spark.createDataFrame(test_only_df)
+    r_only = evaluate(m_only, f"{best_name} — chỉ dữ liệu chuyến bay", time.time() - t0)
+else:
+    algo, linear = algos[best_name]
+    t0 = time.time()
+    m_only = Pipeline(stages=feature_stages(num_only, cat_only, linear) + [algo.copy()]).fit(train)
+    r_only = evaluate(m_only.transform(test), f"{best_name} — chỉ dữ liệu chuyến bay", time.time() - t0)
+
 ablation = pd.DataFrame([r_only, {**results[list(res.index).index(best_name)], "model": f"{best_name} — có tích hợp nguồn ngoài"}]).set_index("model")
 ablation.to_csv(f"{EXPORTS}/05_integration_ablation.csv")
 print("Bỏ nguồn ngoài:", sorted((set(NUM) | set(CAT)) - set(num_only) - set(cat_only)))
@@ -177,10 +223,15 @@ ablation
 # ## Mức độ quan trọng của chỉ số (mô hình cây tốt nhất)
 
 # %%
-tree_name = best_name if best_name != "Linear Regression" else "Gradient-Boosted Trees"
-fm = models[tree_name].stages[-1]
-feat_names = [f"{c}" for c in NUM] + CAT
-imp = pd.Series(fm.featureImportances.toArray(), index=feat_names).sort_values()
+tree_name = best_name if best_name != "Linear Regression" else "LightGBM"
+if tree_name == "LightGBM":
+    feat_names = feature_cols
+    imp = pd.Series(models["LightGBM"].feature_importances_, index=feat_names).sort_values()
+else:
+    fm = models[tree_name].stages[-1]
+    feat_names = [f"{c}" for c in NUM] + CAT
+    imp = pd.Series(fm.featureImportances.toArray(), index=feat_names).sort_values()
+
 imp.to_csv(f"{EXPORTS}/05_feature_importance.csv", header=["importance"])
 fig, ax = plt.subplots(figsize=(9, 7))
 ax.barh(imp.index, imp.values, color=SERIES[0], height=0.65)
@@ -224,9 +275,21 @@ err_window
 # %%
 train.unpersist(); test.unpersist()
 full = data.cache()
-algo, linear = algos[best_name]
-final = Pipeline(stages=feature_stages(NUM, CAT, linear) + [algo.copy()]).fit(full)
-final.write().overwrite().save(f"{DATA_DIR}/models/best_model")
+if best_name == "LightGBM":
+    full_pdf = full.select(*feature_cols, "label").toPandas()
+    for c in CAT:
+        if c in full_pdf.columns:
+            full_pdf[c] = full_pdf[c].astype("category")
+    final_lgb = lgb.LGBMRegressor(n_estimators=100, learning_rate=0.08, num_leaves=63, random_state=SEED, n_jobs=-1, verbose=-1)
+    final_lgb.fit(full_pdf[feature_cols], full_pdf["label"])
+    os.makedirs(f"{DATA_DIR}/models", exist_ok=True)
+    joblib.dump(final_lgb, f"{DATA_DIR}/models/best_model_lgb.joblib")
+    final_lgb.booster_.save_model(f"{DATA_DIR}/models/best_model_lgb.txt")
+else:
+    algo, linear = algos[best_name]
+    final = Pipeline(stages=feature_stages(NUM, CAT, linear) + [algo.copy()]).fit(full)
+    final.write().overwrite().save(f"{DATA_DIR}/models/best_model")
+
 json.dump({"best_model": best_name, "numeric": NUM, "categorical": CAT,
            "test_metrics": res.loc[best_name].to_dict()},
           open(f"{GOLD}/best_model.json", "w", encoding="utf-8"), ensure_ascii=False, indent=2)

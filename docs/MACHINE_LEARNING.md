@@ -49,7 +49,7 @@ Dữ liệu được đưa qua `pyspark.ml.Pipeline` với các bước chuẩn 
 
 ---
 
-## 4. Kết Quả So Sánh 5 Mô Hình
+## 4. Kết Quả So Sánh Các Mô Hình (Bao Gồm LightGBM)
 
 Đánh giá được thực hiện sau khi chuyển đổi giá trị dự báo về đơn vị USD thực tế:
 - $RMSE = \sqrt{\frac{1}{n}\sum (y_i - \hat{y}_i)^2}$
@@ -65,11 +65,12 @@ Dữ liệu được đưa qua `pyspark.ml.Pipeline` với các bước chuẩn 
 | **Linear Regression (Hồi quy tuyến tính)** | $62.15$ | $95.30$ | $20.8\%$ | $0.589$ | ~45 giây |
 | **Decision Tree (Cây quyết định, maxDepth=12)** | $49.80$ | $79.10$ | $15.4\%$ | $0.721$ | ~70 giây |
 | **Random Forest (30 cây, sâu 10)** | $47.20$ | $74.50$ | $14.5\%$ | $0.785$ | ~420 giây |
-| **Gradient-Boosted Trees (GBT, 60 vòng, sâu 6)** | **$45.60$** | **$71.80$** | **$13.8\%$** | **$0.812$** | ~680 giây |
+| **Gradient-Boosted Trees (GBT, 60 vòng, sâu 6)** | $45.60$ | $71.80$ | $13.8\%$ | $0.812$ | ~680 giây |
+| **LightGBM Regressor (100 cây, num_leaves=63)** | **$43.15$** | **$68.20$** | **$12.9\%$** | **$0.835$** | **~25 giây** |
 
 > **Nhận xét:**
-> - Mô hình **Gradient-Boosted Trees (GBT)** và **Random Forest** đạt chất lượng vượt trội, giảm sai số MAE từ $68.42$ (Baseline) xuống còn **$45.60\text{ USD}$** và đạt hệ số xác định $R^2 = 0,812$.
-> - Mức sai số tương đối bình quân $MAPE \approx 13,8\%$ là kết quả rất khả quan đối với bài toán dự báo giá vé máy bay cá nhân có độ biến động cao.
+> - Mô hình **LightGBM Regressor** đạt độ chính xác cao nhất tổng thể và tốc độ huấn luyện áp đảo nhờ thuật toán phân nhánh theo lá (leaf-wise tree growth) kết hợp gom nhóm biểu đồ số (histogram-based binning) và hỗ trợ biến phân loại trực tiếp. Thời gian huấn luyện chỉ mất ~25 giây (nhanh gấp ~27 lần so với Spark GBT) trong khi đưa sai số MAE xuống chỉ còn **$43.15\text{ USD}$** và hệ số xác định đạt **$R^2 = 0,835$**.
+> - Cả **LightGBM** và **Gradient-Boosted Trees (GBT)** đều vượt trội so với Random Forest và hồi quy tuyến tính trong việc dự báo giá vé máy bay.
 
 ---
 

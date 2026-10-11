@@ -25,19 +25,39 @@ def main():
     
     spark = get_spark_32gb("extract-predictions-32gb")
     
-    # 1. Tải best_model_full
-    model_path = f"{MODELS_FULL}/best_model_full"
-    print(f"Đang tải mô hình từ: {model_path}")
-    model = PipelineModel.load(model_path)
-    
-    # 2. Đọc feature_selection.json & trích xuất Feature Importance
+    # 1. Kiểm tra mô hình tốt nhất (LightGBM hoặc Spark)
     sel = json.load(open(f"{GOLD}/feature_selection.json", encoding="utf-8"))
     num_cols, cat_cols = sel["numeric"], sel["categorical"]
     feat_names = num_cols + cat_cols
+
+    lgb_path = f"{MODELS_FULL}/best_model_lgb.joblib"
+    spark_model_path = f"{MODELS_FULL}/best_model_full"
     
-    tree_model = model.stages[-1]
-    importances = tree_model.featureImportances.toArray()
-    imp_series = pd.Series(importances, index=feat_names).sort_values(ascending=False)
+    use_lgb = False
+    comp_file = f"{EXPORTS_FULL}/model_comparison_full.csv"
+    if os.path.exists(comp_file):
+        try:
+            cdf = pd.read_csv(comp_file)
+            best_idx = cdf.iloc[1:]["MAE"].idxmin()
+            if "LightGBM" in str(cdf.loc[best_idx, "model"]) and os.path.exists(lgb_path):
+                use_lgb = True
+        except Exception:
+            pass
+
+    if use_lgb or (os.path.exists(lgb_path) and not os.path.exists(spark_model_path)):
+        import joblib
+        print(f"Đang tải mô hình LightGBM từ: {lgb_path}")
+        lgb_model = joblib.load(lgb_path)
+        feat_names = lgb_model.booster_.feature_name()
+        importances = lgb_model.feature_importances_
+        imp_series = pd.Series(importances, index=feat_names).sort_values(ascending=False)
+        imp_series = imp_series / imp_series.sum()
+    else:
+        print(f"Đang tải mô hình Spark từ: {spark_model_path}")
+        model = PipelineModel.load(spark_model_path)
+        tree_model = model.stages[-1]
+        importances = tree_model.featureImportances.toArray()
+        imp_series = pd.Series(importances, index=feat_names).sort_values(ascending=False)
     
     # Lưu feature importance vào cả 2 thư mục exports
     for exp_dir in [EXPORTS_FULL, f"{DATA_DIR}/exports"]:
@@ -58,9 +78,18 @@ def main():
     n_sample = test_sample.count()
     print(f"Số lượng mẫu kiểm tra: {n_sample:,} dòng")
     
-    # 4. Dự đoán bằng best_model_full
+    # 4. Dự đoán bằng mô hình tốt nhất
     print("Đang thực hiện dự đoán trên tập kiểm tra...")
-    pred_df = model.transform(test_sample).withColumn("pred_fare", F.exp("prediction"))
+    if use_lgb or (os.path.exists(lgb_path) and not os.path.exists(spark_model_path)):
+        req_cols = list(dict.fromkeys(["flightDate", "days_before", "booking_window", "totalFare"] + feat_names))
+        sample_pdf = test_sample.select(*req_cols).toPandas()
+        for c in cat_cols:
+            if c in sample_pdf.columns:
+                sample_pdf[c] = sample_pdf[c].astype("category")
+        sample_pdf["prediction"] = lgb_model.predict(sample_pdf[feat_names])
+        pred_df = spark.createDataFrame(sample_pdf[["flightDate", "days_before", "booking_window", "totalFare", "prediction"]]).withColumn("pred_fare", F.exp("prediction"))
+    else:
+        pred_df = model.transform(test_sample).withColumn("pred_fare", F.exp("prediction"))
     
     # 5. Thống kê theo ngày bay (flightDate)
     print("Tổng hợp dự đoán theo ngày bay (flightDate)...")
