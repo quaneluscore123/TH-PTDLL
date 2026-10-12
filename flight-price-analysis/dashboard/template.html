@@ -34,7 +34,10 @@ nav.tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; bac
   border-bottom: 1px solid var(--line); display: flex; gap: 4px; overflow-x: auto; padding-block: 8px; scrollbar-width: none; }
 nav.tabs a { font: 600 15px var(--f-display); letter-spacing: .02em; color: var(--ink-2); text-decoration: none;
   padding: 6px 12px; border-radius: 6px; white-space: nowrap; }
-nav.tabs a:hover, nav.tabs a:focus-visible { background: var(--chip); color: var(--ink); outline: none; }
+nav.tabs a:hover { background: var(--chip); color: var(--ink); }
+nav.tabs a:focus-visible { background: var(--chip); color: var(--ink); outline: 2px solid var(--accent); outline-offset: 2px; }
+.skip-link { position: absolute; top: -100px; left: 16px; background: var(--accent); color: #fff; padding: 8px 14px; border-radius: 6px; font-weight: 600; text-decoration: none; z-index: 1000; transition: top .15s; }
+.skip-link:focus, .skip-link:focus-visible { top: 12px; outline: 2px solid var(--ink); }
 section { padding-top: 36px; scroll-margin-top: 56px; display: grid; gap: 16px; }
 h2 { font: 700 28px/1.1 var(--f-display); margin: 0; text-wrap: balance; }
 h2 small { display: block; font: 400 14px/1.5 var(--f-body); color: var(--ink-2); margin-top: 6px; max-width: 80ch; }
@@ -79,6 +82,7 @@ select:focus-visible, input[type="date"]:focus-visible { outline: 2px solid var(
 .dd-actions { display: flex; gap: 6px; padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px solid var(--line); }
 .dd-action-btn { font: 500 11px var(--f-mono); background: var(--chip); border: 1px solid var(--line); border-radius: 4px; padding: 3px 8px; color: var(--ink); cursor: pointer; }
 .dd-action-btn:hover { opacity: .8; }
+.dd-action-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .dd-list { display: flex; flex-direction: column; gap: 2px; }
 .dd-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 5px; cursor: pointer; font-size: 13px; color: var(--ink); user-select: none; transition: background .12s; }
 .dd-item:hover { background: var(--chip); }
@@ -96,63 +100,305 @@ ul.flow { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; grid
 ul.flow li { counter-increment: s; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--ink-2); }
 ul.flow li b { display: block; font: 600 16px var(--f-display); color: var(--ink); }
 ul.flow li b::before { content: counter(s) " · "; color: var(--accent); }
+img { max-width: 100%; height: auto; display: block; border-radius: 6px; }
+.cal-wrap { margin-top: 24px; border-top: 1px solid var(--line); padding-top: 18px; }
+.cal-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 960px) { .cal-grid-3 { grid-template-columns: 1fr; } }
+.cal-month { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; display: flex; flex-direction: column; }
+.cal-month-header { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--line); }
+.cal-month-title { font-family: var(--f-display); font-weight: 700; font-size: 16px; color: var(--ink); }
+.cal-month-stat { font-family: var(--f-mono); font-size: 11px; color: var(--good); font-weight: 600; }
+.cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-family: var(--f-mono); font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+.cal-days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-cell { min-height: 48px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 2px; cursor: pointer; transition: background .12s, border-color .12s, transform .08s; user-select: none; width: 100%; box-sizing: border-box; }
+.cal-cell:hover { background: var(--chip); border-color: var(--accent); transform: translateY(-1px); }
+.cal-cell:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.cal-cell.empty { background: transparent; border-color: transparent; cursor: default; }
+.cal-cell.empty:hover { background: transparent; border-color: transparent; transform: none; }
+.cal-cell.selected { border-color: var(--accent); background: rgba(42, 120, 214, 0.12); box-shadow: 0 0 0 1.5px var(--accent); }
+.cal-cell.best-price { border-color: var(--s3); background: rgba(27, 175, 122, 0.12); }
+.cal-cell .day-num { font-family: var(--f-mono); font-size: 12px; font-weight: 600; color: var(--ink); line-height: 1; }
+.cal-cell.selected .day-num { color: var(--accent); font-weight: 700; }
+.cal-cell.best-price .day-num { color: var(--good); }
+.cal-cell .day-price { font-family: var(--f-mono); font-size: 10px; font-weight: 600; color: var(--ink-2); margin-top: 4px; line-height: 1; text-align: center; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cal-cell.best-price .day-price { color: var(--good); font-weight: 700; }
+.cal-nav-btn { font-family: var(--f-mono); font-size: 12px; padding: 5px 11px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; transition: background .12s, border-color .12s; }
+.cal-nav-btn:hover { background: var(--chip); border-color: var(--accent); }
+.cal-nav-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 footer { margin-top: 40px; color: var(--muted); font-size: 12px; }
-@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+.ai-copilot-wrap { margin-top: 24px; border-top: 1px solid var(--line); padding-top: 20px; }
+.ai-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+.ai-header-left { display: flex; align-items: center; gap: 12px; }
+.ai-bot-avatar { width: 40px; height: 40px; border-radius: 10px; background: rgba(42, 120, 214, 0.12); border: 1px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.ai-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+.ai-title { margin: 0; font-size: 17px; font-family: var(--f-display); }
+.ai-status-pill { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f-mono); font-size: 11px; padding: 2px 8px; border-radius: 99px; background: var(--chip); color: var(--muted); border: 1px solid var(--line); }
+.ai-status-pill.online { color: var(--good); border-color: rgba(27, 175, 122, 0.4); background: rgba(27, 175, 122, 0.08); }
+.ai-status-pill.error { color: var(--urgent); border-color: rgba(227, 73, 72, 0.4); background: rgba(227, 73, 72, 0.08); }
+.ai-status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; }
+.ai-config-panel { background: var(--chip); border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin-bottom: 14px; }
+.ai-chips-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.ai-chip { font-family: var(--f-mono); font-size: 11px; padding: 5px 10px; border-radius: 99px; background: var(--surface); border: 1px solid var(--line); color: var(--ink-2); cursor: pointer; transition: all .15s ease; user-select: none; }
+.ai-chip:hover { border-color: var(--accent); color: var(--accent); background: rgba(42, 120, 214, 0.08); transform: translateY(-1px); }
+.ai-chat-box { background: var(--bg); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; max-height: 420px; min-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 10px; scroll-behavior: smooth; }
+.ai-msg { display: flex; gap: 10px; align-items: flex-start; max-width: 92%; }
+.ai-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.ai-msg.bot { align-self: flex-start; }
+.ai-msg-avatar { width: 28px; height: 28px; border-radius: 6px; background: var(--chip); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.ai-msg.user .ai-msg-avatar { background: rgba(42, 120, 214, 0.15); }
+.ai-msg-bubble { padding: 10px 14px; border-radius: 10px; font-size: 13.5px; line-height: 1.55; color: var(--ink); background: var(--surface); border: 1px solid var(--line); word-break: break-word; }
+.ai-msg.user .ai-msg-bubble { background: rgba(42, 120, 214, 0.1); border-color: rgba(42, 120, 214, 0.3); }
+.ai-msg-bubble p { margin: 0 0 6px 0; }
+.ai-msg-bubble p:last-child { margin-bottom: 0; }
+.ai-msg-bubble ul, .ai-msg-bubble ol { margin: 4px 0 6px 18px; padding: 0; }
+.ai-msg-bubble li { margin-bottom: 3px; }
+.ai-input-bar { display: flex; gap: 8px; align-items: flex-end; }
+#aiUserInput { flex: 1; font-family: inherit; font-size: 13.5px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; resize: vertical; min-height: 40px; max-height: 120px; line-height: 1.4; box-sizing: border-box; }
+#aiUserInput:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.ai-send-btn { font-family: var(--f-mono); font-size: 12.5px; font-weight: 600; padding: 9px 16px; background: var(--accent); color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: opacity .15s, transform .1s; height: 40px; white-space: nowrap; }
+.ai-send-btn:hover { opacity: .9; transform: translateY(-1px); }
+.ai-stop-btn { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 9px 12px; background: var(--urgent); color: #fff; border: none; border-radius: 8px; cursor: pointer; height: 40px; }
+.ai-typing-indicator { display: inline-flex; gap: 4px; padding: 4px 0; }
+.ai-typing-indicator span { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: aiBounce .9s infinite ease-in-out; }
+.ai-typing-indicator span:nth-child(2) { animation-delay: .2s; }
+.ai-typing-indicator span:nth-child(3) { animation-delay: .4s; }
+.ai-widget-launcher {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 99px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(42, 120, 214, 0.38);
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: 14px;
+  user-select: none;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.ai-widget-launcher:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(42, 120, 214, 0.48);
+}
+.ai-widget-launcher:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.ai-launcher-icon { font-size: 18px; line-height: 1; }
+.ai-launcher-badge {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  background: rgba(255, 255, 255, 0.24);
+  padding: 2px 7px;
+  border-radius: 99px;
+  font-weight: 500;
+  letter-spacing: .02em;
+}
+
+.ai-chat-modal {
+  position: fixed;
+  bottom: 84px;
+  right: 24px;
+  width: 430px;
+  max-width: calc(100vw - 32px);
+  height: 590px;
+  max-height: calc(100vh - 110px);
+  z-index: 1000;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.24);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: aiModalSlideUp .18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes aiModalSlideUp {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.ai-modal-header {
+  padding: 12px 14px;
+  background: var(--chip);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ai-modal-header-info { display: flex; align-items: center; gap: 10px; }
+.ai-modal-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(42, 120, 214, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+.ai-modal-title {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 14.5px;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.ai-modal-sub {
+  font-size: 11px;
+  color: var(--good);
+  font-family: var(--f-mono);
+}
+.ai-modal-header-actions { display: flex; gap: 4px; }
+.ai-icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 5px;
+  font-size: 14px;
+  transition: background .12s, color .12s;
+}
+.ai-icon-btn:hover { background: var(--surface); color: var(--ink); }
+
+.ai-modal-context-bar {
+  padding: 7px 12px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 11px;
+  font-family: var(--f-mono);
+}
+.ai-ctx-tag {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 2px 7px;
+  border-radius: 4px;
+  color: var(--ink-2);
+}
+.ai-ctx-tag b { color: var(--accent); }
+
+.ai-modal-body {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--bg);
+  scroll-behavior: smooth;
+}
+
+.ai-modal-chips {
+  padding: 8px 12px;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.ai-modal-chips::-webkit-scrollbar { height: 3px; }
+
+.ai-modal-footer {
+  padding: 10px 12px;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+#aiModalInput {
+  flex: 1;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  resize: none;
+  min-height: 38px;
+  max-height: 100px;
+  line-height: 1.4;
+  box-sizing: border-box;
+}
+#aiModalInput:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
 html { scroll-behavior: smooth; }
 </style>
 
+<a href="#tong-quan" class="skip-link">Chuyển đến nội dung chính</a>
 <div class="wrap">
   <header class="top">
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-      <div class="eyebrow">Tích hợp &amp; phân tích dữ liệu lớn · PySpark</div>
+      <div class="eyebrow">Phân tích dữ liệu lớn · PySpark</div>
       <div style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-family:var(--f-mono);background:var(--chip);padding:4px 10px;border-radius:6px;border:1px solid var(--line)">
-        <span style="color:var(--muted)">ĐƠN VỊ TIỀN TỆ:</span>
-        <select id="selGlobalCurrency" style="font-size:12px;padding:2px 6px;min-width:auto;border:none;background:transparent;font-weight:600;color:var(--ink);cursor:pointer">
+        <label for="selGlobalCurrency" style="color:var(--muted);cursor:pointer">ĐƠN VỊ TIỀN TỆ:</label>
+        <select id="selGlobalCurrency" aria-label="Chọn đơn vị tiền tệ hiển thị" style="font-size:12px;padding:2px 6px;min-width:auto;border:none;background:transparent;font-weight:600;color:var(--ink);cursor:pointer">
           <option value="VND" selected>VNĐ (₫) · 1 USD = 25.450 ₫</option>
           <option value="USD">USD ($)</option>
         </select>
       </div>
     </div>
     <h1>Giá vé máy bay Mỹ <span class="route">2022 → 2027</span></h1>
-    <p class="lede" id="lede">Phân tích 82 triệu vé tìm trên Expedia năm 2022, tích hợp ngày lễ, thời tiết, nhiên liệu, lạm phát và giá vé thực tế của Bộ Giao thông Mỹ, rồi dự báo đến hết năm 2027.</p>
+    <p class="lede" id="lede">Phân tích 82 triệu vé tìm kiếm trên Expedia năm 2022, kết hợp dữ liệu ngày lễ, thời tiết, giá nhiên liệu và chỉ số CPI, sau đó dự báo xu hướng đến hết năm 2027.</p>
   </header>
 
   <nav class="tabs" aria-label="Các phần">
-    <a href="#tong-quan">Tổng quan</a><a href="#dat-ve">Đặt sớm hay đi gấp</a><a href="#yeu-to">Yếu tố &amp; tương quan</a>
-    <a href="#mo-hinh">Mô hình T9–T10/2022</a><a href="#du-bao">Dự báo 2023–2027</a><a href="#tra-cuu">Tra cứu ngày bay</a>
-    <a href="#bieu-do-anh">Biểu đồ ảnh (Figures)</a><a href="#du-lieu">Dữ liệu</a>
+    <a href="#tong-quan">Tổng quan</a><a href="#dat-ve">Thời điểm đặt vé</a><a href="#yeu-to">Yếu tố tương quan</a>
+    <a href="#mo-hinh">Đánh giá mô hình</a><a href="#du-bao">Dự báo 2023–2027</a><a href="#tra-cuu">Tra cứu ngày bay</a>
+    <a href="#bieu-do-anh">Biểu đồ huấn luyện</a><a href="#du-lieu">Dữ liệu</a>
   </nav>
 
   <section id="tong-quan">
-    <h2>Tổng quan<small>Toàn bộ dữ liệu sau làm sạch, tính bằng Spark trên máy cá nhân (16 GB RAM).</small></h2>
+    <h2>Tổng quan<small>Số liệu sau làm sạch, tính toán bằng Spark trên máy 16 GB RAM.</small></h2>
     <div class="kpis" id="kpis"></div>
     <ul class="flow">
       <li><b>Raw</b>CSV Expedia 31 GB, 82,1 triệu dòng</li>
       <li><b>Bronze</b>Parquet zstd 4,5 GB, giữ nguyên dữ liệu thô</li>
-      <li><b>Silver</b>Làm sạch + 7 nguồn ngoài, 57 cột</li>
-      <li><b>Gold</b>21 bảng tổng hợp + ma trận tương quan</li>
-      <li><b>ML</b>5 mô hình Spark MLlib, kiểm tra T9–T10</li>
-      <li><b>Dự báo</b>Backtest 2023, hiệu chỉnh, đến 12/2027</li>
+      <li><b>Silver</b>Làm sạch và kết hợp 7 nguồn ngoài, 57 cột</li>
+      <li><b>Gold</b>21 bảng tổng hợp và ma trận tương quan</li>
+      <li><b>ML</b>5 mô hình Spark MLlib và LightGBM, kiểm tra tháng 9–10/2022</li>
+      <li><b>Dự báo</b>Kiểm định backtest 2023, hiệu chỉnh sai số, dự báo đến 12/2027</li>
     </ul>
   </section>
 
   <section id="dat-ve">
-    <h2>Đặt sớm hay đi gấp?<small>Giá trung vị theo số ngày đặt trước ngày bay. Dải mờ là khoảng giữa 25% và 75% số vé.</small></h2>
+    <h2>Thời điểm đặt vé<small>Giá trung vị theo số ngày đặt trước ngày bay. Dải màu thể hiện khoảng 25%–75% số vé.</small></h2>
     <div class="grid">
       <div class="panel c8"><h3>Đường giá theo số ngày đặt trước</h3><p class="sub" id="curveSub"></p><div class="chart tall"><canvas id="chCurve"></canvas></div></div>
       <div class="panel c4"><h3>Ba nhóm thời điểm đặt</h3><p class="sub">So với nhóm đặt sớm 31–60 ngày</p><div class="tbl"><table id="tblWindows"></table></div>
         <p class="note" id="windowNote" style="margin-top:14px"></p></div>
-      <div class="panel c6"><h3>Đội giá khi đặt 1–7 ngày, theo hãng</h3><p class="sub">% chênh giá trung vị so với đặt sớm 31–60 ngày</p><div class="chart"><canvas id="chPremAir"></canvas></div></div>
-      <div class="panel c6"><h3>Tuyến đội giá ít nhất và nhiều nhất</h3><p class="sub">Cùng phép so sánh, các tuyến có ≥ 20.000 vé</p><div class="chart"><canvas id="chPremRoute"></canvas></div></div>
+      <div class="panel c6"><h3>Mức tăng giá khi đặt cận ngày theo hãng</h3><p class="sub">Tỷ lệ chênh lệch giá trung vị đặt 1–7 ngày so với đặt sớm 31–60 ngày</p><div class="chart"><canvas id="chPremAir"></canvas></div></div>
+      <div class="panel c6"><h3>Các tuyến biến động giá nhiều nhất và ít nhất</h3><p class="sub">Tuyến bay có từ 20.000 vé trở lên</p><div class="chart"><canvas id="chPremRoute"></canvas></div></div>
     </div>
   </section>
 
   <section id="yeu-to">
-    <h2>Yếu tố ảnh hưởng và hệ số tương quan<small>Pearson tính trên toàn bộ dữ liệu, Spearman trên mẫu 3%, tỉ số η cho biến phân loại. Kết quả dùng để chọn chỉ số đưa vào huấn luyện.</small></h2>
+    <h2>Các yếu tố tương quan<small>Hệ số Pearson trên toàn bộ tập dữ liệu, Spearman trên mẫu 3%, và tỷ số tương quan η cho biến phân loại.</small></h2>
     <div class="grid">
-      <div class="panel c7"><h3>Tương quan với giá vé</h3><p class="sub">Pearson r, sắp theo độ lớn</p><div class="chart tall"><canvas id="chCorr"></canvas></div></div>
-      <div class="panel c5"><h3>Biến phân loại (η)</h3><p class="sub">Phần giá vé được giải thích bởi nhóm</p><div class="chart short"><canvas id="chEta"></canvas></div>
-        <h3 style="margin-top:16px">Chỉ số được chọn cho mô hình</h3><div id="selected"></div></div>
+      <div class="panel c7"><h3>Hệ số tương quan Pearson với giá vé</h3><p class="sub">Sắp xếp theo giá trị tuyệt đối</p><div class="chart tall"><canvas id="chCorr"></canvas></div></div>
+      <div class="panel c5"><h3>Biến phân loại (η)</h3><p class="sub">Mức độ giải thích phương sai giá vé</p><div class="chart short"><canvas id="chEta"></canvas></div>
+        <h3 style="margin-top:16px">Chỉ số được chọn vào mô hình</h3><div id="selected"></div></div>
       <div class="panel c3"><h3>Theo thứ của ngày bay</h3><div class="chart short"><canvas id="chDow"></canvas></div></div>
       <div class="panel c3"><h3>Theo giờ khởi hành</h3><div class="chart short"><canvas id="chHour"></canvas></div></div>
       <div class="panel c3"><h3>Theo số điểm dừng</h3><div class="chart short"><canvas id="chStops"></canvas></div></div>
@@ -161,35 +407,43 @@ html { scroll-behavior: smooth; }
   </section>
 
   <section id="mo-hinh">
-    <h2>Mô hình: học tháng 4–8, dự đoán tháng 9–10/2022<small>Mẫu 5% của Silver. Mô hình chưa từng thấy chuyến bay nào của tháng 9–10.</small></h2>
+    <h2>Đánh giá mô hình (tháng 9–10/2022)<small>Huấn luyện trên dữ liệu bay tháng 4–8/2022 và kiểm tra độc lập trên tháng 9–10/2022 (mẫu 5%).</small></h2>
     <div class="grid">
       <div class="panel c7"><h3>So sánh 5 mô hình</h3><p class="sub">Sai số trên tập kiểm tra tháng 9–10/2022</p><div class="tbl"><table id="tblModels"></table></div></div>
-      <div class="panel c5"><h3>Giá trị của việc tích hợp dữ liệu</h3><p class="sub">Cùng mô hình, có và không có nguồn ngoài</p><div class="tbl"><table id="tblAbl"></table></div>
+      <div class="panel c5"><h3>Hiệu quả khi tích hợp dữ liệu bổ trợ</h3><p class="sub">So sánh sai số trước và sau khi bổ sung 7 nguồn dữ liệu bên ngoài</p><div class="tbl"><table id="tblAbl"></table></div>
         <h3 style="margin-top:16px">Sai số theo thời điểm đặt</h3><div class="tbl"><table id="tblErrW"></table></div></div>
       <div class="panel c8"><h3>Giá trung bình theo ngày bay: thực tế và dự đoán</h3><p class="sub" id="testSub"></p><div class="chart"><canvas id="chTest"></canvas></div></div>
-      <div class="panel c4"><h3>Chỉ số quan trọng nhất</h3><p class="sub" id="impSub"></p><div class="chart"><canvas id="chImp"></canvas></div></div>
+      <div class="panel c4"><h3>Mức độ quan trọng của đặc trưng</h3><p class="sub" id="impSub"></p><div class="chart"><canvas id="chImp"></canvas></div></div>
     </div>
   </section>
 
   <section id="du-bao">
-    <h2>Dự báo 2023 → 2027<small>Bước 1: chỉ dùng thông tin đến hết 2022 để dự báo 2023 rồi so với giá thực tế của DOT. Bước 2: hiệu chỉnh và kiểm tra lại trên Q1/2024. Bước 3: dự báo đến 12/2027.</small></h2>
+    <h2>Dự báo xu hướng 2023–2027<small>Dự báo năm 2023 từ dữ liệu 2022 rồi so sánh với báo cáo thực tế của Bộ Giao thông Mỹ (DOT), sau đó hiệu chỉnh để dự báo đến năm 2027.</small></h2>
     <div class="grid">
       <div class="panel c12"><h3>Chỉ số giá vé máy bay (CPI) — thực tế và dự báo</h3><p class="sub" id="cpiSub"></p><div class="chart"><canvas id="chCpi"></canvas></div></div>
-      <div class="panel c7"><h3>Backtest 2023: dự báo từ dữ liệu 2022 so với thực tế</h3><p class="sub">Giá vé từng tuyến × quý, so với DOT 2023</p><div class="tbl"><table id="tblBt"></table></div></div>
+      <div class="panel c7"><h3>Kiểm nghiệm dự báo năm 2023 (Backtest)</h3><p class="sub">So sánh giá vé theo tuyến và quý với dữ liệu thực tế từ DOT</p><div class="tbl"><table id="tblBt"></table></div></div>
       <div class="panel c5"><h3>Trung bình các tuyến theo quý 2023</h3><p class="sub">USD, giá vé một chiều</p><div class="chart short"><canvas id="chBtQ"></canvas></div>
-        <h3 style="margin-top:16px">Kiểm tra sau hiệu chỉnh: Q1/2024</h3><div class="tbl"><table id="tblV24"></table></div></div>
+        <h3 style="margin-top:16px">Kiểm tra sau hiệu chỉnh: Quý 1/2024</h3><div class="tbl"><table id="tblV24"></table></div></div>
       <div class="panel c12"><h3>Giá trung bình các tuyến theo năm</h3><p class="sub">2022 là thực tế Expedia; từ 2023 là ước tính và dự báo</p><div class="tbl"><table id="tblYear"></table></div></div>
     </div>
   </section>
 
   <section id="tra-cuu">
-    <h2>Tra cứu: giá dự báo cho một chuyến bay<small>Chọn loại vé (một chiều hoặc khứ hồi), tuyến bay, ngày bay và hãng bay để xem giá dự báo chi tiết theo từng ngày đặt trước.</small></h2>
+    <h2>Tra cứu giá dự báo theo chuyến bay<small>Chọn loại vé, tuyến bay, ngày khởi hành và hãng hàng không để xem đường cong giá theo số ngày đặt trước.</small></h2>
     <div class="panel">
       <div class="controls">
         <label for="selTripType">Loại vé
           <select id="selTripType">
             <option value="oneway">Một chiều (One-way)</option>
             <option value="roundtrip">Khứ hồi (Round-trip)</option>
+          </select>
+        </label>
+        <label for="selCabin">Hạng vé
+          <select id="selCabin">
+            <option value="basic" selected>Phổ thông tiết kiệm (Basic Economy · Chuẩn Google Flights)</option>
+            <option value="main">Phổ thông tiêu chuẩn (Main Cabin / Coach · Mặc định)</option>
+            <option value="premium">Phổ thông đặc biệt (Premium Economy · +38%)</option>
+            <option value="first">Thương gia / Hạng nhất (Business / First · +115%)</option>
           </select>
         </label>
         <label for="selCurrency">Tiền tệ
@@ -200,23 +454,29 @@ html { scroll-behavior: smooth; }
         </label>
         <label for="selModel">Mô hình ML
           <select id="selModel">
-            <option value="lgb" selected>LightGBM (Khuyên dùng · R² 0.597)</option>
+            <option value="lgb" selected>LightGBM (R² 0.597 · Tốt nhất)</option>
             <option value="gbt">Spark GBT (R² 0.589)</option>
             <option value="rf">Random Forest (R² 0.571)</option>
             <option value="lr">Linear Regression (R² 0.476)</option>
             <option value="baseline">Baseline (Trung vị tuyến · R² 0.125)</option>
           </select>
         </label>
-        <label for="selRoute">Tuyến bay <span id="routeLegSuffix" style="display:none;font-size:11px;color:var(--accent);font-weight:400">(Chiều đi)</span><select id="selRoute"></select></label>
+        <label for="selOrigin">Nơi đi (Khởi hành)<span id="originLegSuffix" style="display:none;font-size:11px;color:var(--accent);font-weight:400"> (Chiều đi)</span>
+          <select id="selOrigin"></select>
+        </label>
+        <button type="button" id="btnSwapRoute" title="Đổi chiều sân bay" aria-label="Đổi chiều sân bay" class="cal-nav-btn" style="height:35px;align-self:end;padding:0 10px;font-size:15px;margin-bottom:1px">⇄</button>
+        <label for="selDest">Nơi đến (Hạ cánh)<span id="destLegSuffix" style="display:none;font-size:11px;color:var(--accent);font-weight:400"> (Chiều đi)</span>
+          <select id="selDest"></select>
+        </label>
         <label for="inpDate"><span id="lblDepDate">Ngày bay</span><input type="date" id="inpDate" min="2023-01-01" max="2027-12-31"></label>
         <label for="inpReturnDate" id="lblReturnDate" style="display:none">Ngày về (Chiều về)<input type="date" id="inpReturnDate" min="2023-01-01" max="2027-12-31"></label>
         <div class="dd-air" id="wrapAirline">
-          <span class="dd-label">Hãng hàng không</span>
-          <button type="button" class="dd-trigger" id="btnAirlineDd" aria-expanded="false">
+          <span class="dd-label" id="lblAirTitle">Hãng hàng không</span>
+          <button type="button" class="dd-trigger" id="btnAirlineDd" aria-expanded="false" aria-haspopup="listbox" aria-controls="popoverAirline" aria-labelledby="lblAirTitle lblAirlineCount">
             <span id="lblAirlineCount">Tất cả hãng (9)</span>
-            <span class="dd-caret">▾</span>
+            <span class="dd-caret" aria-hidden="true">▾</span>
           </button>
-          <div id="popoverAirline" class="dd-popover" style="display:none">
+          <div id="popoverAirline" class="dd-popover" role="region" aria-label="Danh sách hãng hàng không" style="display:none">
             <div class="dd-actions">
               <button type="button" class="dd-action-btn" id="btnAirCheckAll">Chọn tất cả</button>
               <button type="button" class="dd-action-btn" id="btnAirUncheckAll">Bỏ chọn</button>
@@ -227,29 +487,163 @@ html { scroll-behavior: smooth; }
       </div>
       <div class="board" id="board"></div>
       <div class="chart" style="margin-top:14px"><canvas id="chPlan"></canvas></div>
-      <p class="note" id="planNote" style="margin-top:12px">Giá dự báo = mức giá Expedia 2022 của tuyến × chỉ số CPI vé máy bay của tháng bay (thực tế hoặc dự báo) × hệ số hiệu chỉnh từ backtest 2023 × hệ số đường giá theo số ngày đặt trước. Đây là giá tìm kiếm trên Expedia (đã gồm thuế phí, một chiều).</p>
+      <p class="note" id="planNote" style="margin-top:12px">Giá dự báo tính từ giá nền tuyến theo tháng, nhân với hệ số theo ngày trong tuần, kỳ nghỉ lễ, mô hình lựa chọn và định giá của từng hãng.</p>
+      <div class="cal-wrap">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+          <div>
+            <h3 style="margin:0 0 2px;font-size:17px">Lịch giá vé dự báo 3 tháng (Giá thấp nhất theo ngày bay)</h3>
+            <p class="sub" style="margin:0" id="calSubNote">Hiển thị mức giá thấp nhất trong các hãng được chọn. Bấm vào ngày bất kỳ để xem chi tiết.</p>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <button type="button" class="cal-nav-btn" id="btnCalPrev" aria-label="Xem 3 tháng trước">‹ 3 tháng trước</button>
+            <button type="button" class="cal-nav-btn" id="btnCalReset" aria-label="Quay lại tháng của ngày bay đang chọn">Về ngày đã chọn</button>
+            <button type="button" class="cal-nav-btn" id="btnCalNext" aria-label="Xem 3 tháng sau">3 tháng sau ›</button>
+          </div>
+        </div>
+        <div class="cal-grid-3" id="cal3Months"></div>
+      </div>
+
+      <!-- AI COPILOT (QWEN OLLAMA LOCAL) -->
+      <div class="ai-copilot-wrap" id="aiCopilotWrap">
+        <div class="ai-header">
+          <div class="ai-header-left">
+            <div class="ai-bot-avatar" aria-hidden="true">🤖</div>
+            <div>
+              <div class="ai-title-row">
+                <h3 class="ai-title">Trợ lý AI Cố vấn Đặt vé</h3>
+                <span class="ai-status-pill online" id="aiStatusPill">
+                  <span class="ai-status-dot"></span>
+                  <span id="aiStatusText">Qwen 2.5 (Ollama)</span>
+                </span>
+              </div>
+              <p class="sub" style="margin:0">Tư vấn thời điểm mua vé tối ưu, phân tích xu hướng giá &amp; gợi ý lịch bay dựa trên dữ liệu mô hình.</p>
+            </div>
+          </div>
+          <div class="ai-header-right">
+            <button type="button" class="cal-nav-btn" id="btnAiConfig" title="Cài đặt kết nối Ollama">⚙ Cấu hình Ollama</button>
+            <button type="button" class="cal-nav-btn" id="btnAiClear" title="Xóa đoạn chat">Xóa lịch sử</button>
+          </div>
+        </div>
+
+        <!-- Cấu hình Ollama -->
+        <div class="ai-config-panel" id="aiConfigPanel" style="display:none">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+            <label style="display:grid;gap:4px;font-size:11px;font-family:var(--f-mono)">
+              URL Ollama Server
+              <input type="text" id="inpAiEndpoint" value="http://localhost:11434" style="font-size:13px;padding:5px 8px;border-radius:4px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-width:220px">
+            </label>
+            <label style="display:grid;gap:4px;font-size:11px;font-family:var(--f-mono)">
+              Tên Model Ollama
+              <input type="text" id="inpAiModel" value="qwen2.5:7b-instruct" style="font-size:13px;padding:5px 8px;border-radius:4px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-width:180px">
+            </label>
+            <button type="button" class="cal-nav-btn" id="btnAiCheckConn" style="height:32px">Kiểm tra kết nối</button>
+          </div>
+          <p class="sub" id="aiConnMsg" style="margin:6px 0 0;font-size:11px">Đang kết nối tới Ollama local trên cổng 11434.</p>
+        </div>
+
+        <!-- Gợi ý câu hỏi nhanh -->
+        <div class="ai-chips-wrap">
+          <span style="font-size:12px;font-weight:600;color:var(--muted);align-self:center;margin-right:2px">Hỏi nhanh:</span>
+          <button type="button" class="ai-chip" data-q="Nên đặt vé trước bao nhiêu ngày để có giá rẻ nhất cho chuyến bay này?">📅 Khi nào nên đặt vé?</button>
+          <button type="button" class="ai-chip" data-q="Nên bay vào thứ mấy trong tuần và tháng nào tiết kiệm nhất cho chặng này?">🛫 Đi thời điểm nào rẻ nhất?</button>
+          <button type="button" class="ai-chip" data-q="Hãng hàng không nào có giá tối ưu nhất cho chặng này và chênh lệch ra sao?">✈ Nên chọn hãng bay nào?</button>
+          <button type="button" class="ai-chip" data-q="Phân tích tổng quan kế hoạch chuyến bay hiện tại và đưa ra chiến lược đặt vé tốt nhất.">💡 Phân tích chiến lược đặt vé</button>
+        </div>
+
+        <!-- Khung chat -->
+        <div class="ai-chat-box" id="aiChatBox" role="log" aria-live="polite">
+          <div class="ai-msg bot">
+            <div class="ai-msg-avatar" aria-hidden="true">🤖</div>
+            <div class="ai-msg-bubble">
+              <p style="margin:0 0 6px"><strong>Xin chào! Tôi là Trợ lý AI Qwen 2.5</strong> được kết nối trực tiếp với dữ liệu mô hình dự báo giá vé máy bay.</p>
+              <p style="margin:0">Tôi có thể phân tích chặng bay bạn đang chọn (<b><span id="aiIntroRoute">BOS → IAD</span></b>), thời điểm nên chốt vé, mẹo chọn ngày đi để tiết kiệm chi phí tối đa. Bạn có thể bấm các gợi ý phía trên hoặc đặt câu hỏi bên dưới!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nhập câu hỏi -->
+        <div class="ai-input-bar">
+          <textarea id="aiUserInput" rows="1" placeholder="Hỏi AI về thời điểm mua vé, gợi ý ngày bay, so sánh hãng bay..." aria-label="Nhập câu hỏi cho trợ lý AI"></textarea>
+          <button type="button" class="ai-send-btn" id="btnAiSend">
+            <span>Gửi câu hỏi</span>
+          </button>
+          <button type="button" class="ai-stop-btn" id="btnAiStop" style="display:none" title="Dừng sinh câu trả lời">■ Dừng</button>
+        </div>
+      </div>
     </div>
   </section>
 
   <section id="bieu-do-anh">
-    <h2>Biểu đồ ảnh phân tích &amp; báo cáo (Matplotlib Figures)<small>Toàn bộ 7 biểu đồ chất lượng cao (150 DPI) được xuất từ quy trình phân tích và mô hình huấn luyện 80 triệu dòng.</small></h2>
+    <h2>Biểu đồ xuất từ quy trình huấn luyện<small>7 biểu đồ phân tích và kiểm định mô hình trên tập dữ liệu đầy đủ.</small></h2>
     <div class="grid">
-      <div class="panel c6"><h3>1. So sánh mô hình trên 80 triệu dòng</h3><p class="sub">fig_05_model_comparison.png</p><img src="figures/fig_05_model_comparison.png" alt="So sánh mô hình" loading="lazy"></div>
-      <div class="panel c6"><h3>2. Tầm quan trọng đặc trưng (Random Forest)</h3><p class="sub">fig_05_feature_importance.png</p><img src="figures/fig_05_feature_importance.png" alt="Feature Importance" loading="lazy"></div>
-      <div class="panel c12"><h3>3. Thực tế vs Dự đoán theo ngày bay &amp; mốc đặt vé</h3><p class="sub">fig_05_actual_vs_pred.png</p><img src="figures/fig_05_actual_vs_pred.png" alt="Actual vs Pred" loading="lazy"></div>
-      <div class="panel c6"><h3>4. Tương quan vĩ mô YoY (CPI vé, lạm phát &amp; nhiên liệu)</h3><p class="sub">fig_06_macro_yoy.png</p><img src="figures/fig_06_macro_yoy.png" alt="Macro YoY" loading="lazy"></div>
-      <div class="panel c6"><h3>5. Kiểm chứng Backtest 2023 với dữ liệu thực tế DOT</h3><p class="sub">fig_06_backtest_2023.png</p><img src="figures/fig_06_backtest_2023.png" alt="Backtest 2023" loading="lazy"></div>
-      <div class="panel c6"><h3>6. Quỹ đạo dự báo CPI vé máy bay đến 2027</h3><p class="sub">fig_06_cpi_forecast.png</p><img src="figures/fig_06_cpi_forecast.png" alt="CPI Forecast" loading="lazy"></div>
-      <div class="panel c6"><h3>7. Dự báo đường cong giá 2027 theo ngày đặt trước</h3><p class="sub">fig_06_booking_curve_2027.png</p><img src="figures/fig_06_booking_curve_2027.png" alt="Booking Curve 2027" loading="lazy"></div>
+      <div class="panel c6"><h3>1. So sánh mô hình trên 80 triệu dòng</h3><p class="sub">fig_05_model_comparison.png</p><img src="figures/fig_05_model_comparison.png" alt="Biểu đồ so sánh MAE, MAPE và R2 giữa 5 mô hình trên 80 triệu dòng" width="1200" height="300" loading="lazy"></div>
+      <div class="panel c6"><h3>2. Tầm quan trọng đặc trưng (Random Forest)</h3><p class="sub">fig_05_feature_importance.png</p><img src="figures/fig_05_feature_importance.png" alt="Biểu đồ mức độ quan trọng của các đặc trưng trong mô hình Random Forest" width="600" height="390" loading="lazy"></div>
+      <div class="panel c12"><h3>3. Thực tế vs Dự đoán theo ngày bay &amp; mốc đặt vé</h3><p class="sub">fig_05_actual_vs_pred.png</p><img src="figures/fig_05_actual_vs_pred.png" alt="Biểu đồ giá thực tế và dự đoán theo ngày bay và số ngày đặt trước" width="1200" height="338" loading="lazy"></div>
+      <div class="panel c6"><h3>4. Tương quan vĩ mô YoY (CPI vé, lạm phát &amp; nhiên liệu)</h3><p class="sub">fig_06_macro_yoy.png</p><img src="figures/fig_06_macro_yoy.png" alt="Biểu đồ tương quan giữa chỉ số CPI vé máy bay, lạm phát và giá nhiên liệu" width="650" height="225" loading="lazy"></div>
+      <div class="panel c6"><h3>5. Kiểm chứng Backtest 2023 với dữ liệu thực tế DOT</h3><p class="sub">fig_06_backtest_2023.png</p><img src="figures/fig_06_backtest_2023.png" alt="Biểu đồ so sánh kết quả backtest 2023 với giá vé thực tế từ Bộ Giao thông Mỹ" width="800" height="240" loading="lazy"></div>
+      <div class="panel c6"><h3>6. Quỹ đạo dự báo CPI vé máy bay đến 2027</h3><p class="sub">fig_06_cpi_forecast.png</p><img src="figures/fig_06_cpi_forecast.png" alt="Biểu đồ quỹ đạo dự báo chỉ số CPI vé máy bay từ 2023 đến 2027 kèm khoảng tin cậy" width="650" height="225" loading="lazy"></div>
+      <div class="panel c6"><h3>7. Dự báo đường cong giá 2027 theo ngày đặt trước</h3><p class="sub">fig_06_booking_curve_2027.png</p><img src="figures/fig_06_booking_curve_2027.png" alt="Biểu đồ dự báo đường cong giá năm 2027 theo số ngày đặt trước" width="600" height="225" loading="lazy"></div>
     </div>
   </section>
 
   <section id="du-lieu">
-    <h2>Dữ liệu đã tạo ra<small>Các bảng kết quả xuất ra thư mục <code>E:/flight-data/exports</code>, dùng cho báo cáo và dashboard này.</small></h2>
+    <h2>Bảng dữ liệu kết quả<small>Các tệp dữ liệu xuất từ pipeline xử lý và kiểm định mô hình.</small></h2>
     <div class="panel"><div class="tbl"><table id="tblFiles"></table></div></div>
     <p class="sub">Nguồn: Expedia (Kaggle dilwong/flightprices) · OpenFlights · thư viện holidays · Open-Meteo · EIA · BLS · DOT Consumer Airfare Report · BTS Average Fare.</p>
   </section>
   <footer id="foot"></footer>
+</div>
+
+<!-- FLOATING AI CHAT WIDGET (HỎI TRỰC TIẾP QWEN 2.5) -->
+<div class="ai-widget-launcher" id="aiWidgetLauncher" role="button" aria-label="Mở ô chat Trợ lý AI Qwen" tabindex="0">
+  <div class="ai-launcher-icon">💬</div>
+  <div class="ai-launcher-label">Hỏi Trợ lý AI</div>
+  <div class="ai-launcher-badge">Qwen 2.5</div>
+</div>
+
+<div class="ai-chat-modal" id="aiChatModal" style="display:none" role="dialog" aria-labelledby="aiModalTitle">
+  <div class="ai-modal-header">
+    <div class="ai-modal-header-info">
+      <div class="ai-modal-avatar">🤖</div>
+      <div>
+        <div class="ai-modal-title" id="aiModalTitle">Trợ lý AI Cố vấn Đặt vé</div>
+        <div class="ai-modal-sub" id="aiModalSub">🟢 Qwen 2.5 (Ollama local)</div>
+      </div>
+    </div>
+    <div class="ai-modal-header-actions">
+      <button type="button" class="ai-icon-btn" id="btnModalClear" title="Xóa lịch sử chat">🗑</button>
+      <button type="button" class="ai-icon-btn" id="btnModalClose" title="Đóng ô chat">✕</button>
+    </div>
+  </div>
+
+  <div class="ai-modal-context-bar" id="aiModalContextBar">
+    <span class="ai-ctx-tag">Chặng: <b id="aiModalRoute">BOS → IAD</b></span>
+    <span class="ai-ctx-tag" id="aiModalFareTag">Dự báo: <b>--</b></span>
+    <span class="ai-ctx-tag" id="aiModalCabinTag">Phổ thông</span>
+  </div>
+
+  <div class="ai-modal-body" id="aiModalChatBox" role="log" aria-live="polite">
+    <div class="ai-msg bot">
+      <div class="ai-msg-avatar" aria-hidden="true">🤖</div>
+      <div class="ai-msg-bubble">
+        <p style="margin:0 0 6px"><strong>Xin chào! Tôi là Trợ lý AI Qwen 2.5.</strong></p>
+        <p style="margin:0">Tôi được kết nối trực tiếp với mô hình Machine Learning của dashboard. Bạn có thể hỏi tôi bất kỳ câu hỏi nào: <em>khi nào nên mua vé, ngày nào bay rẻ nhất, nên chọn hãng nào</em> cho chặng bay đang xem!</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="ai-modal-chips" id="aiModalChips">
+    <button type="button" class="ai-chip" data-q="Nên đặt vé trước bao nhiêu ngày để có giá rẻ nhất cho chuyến bay này?">📅 Khi nào nên mua?</button>
+    <button type="button" class="ai-chip" data-q="Nên bay vào thứ mấy trong tuần và tháng nào tiết kiệm nhất cho chặng này?">🛫 Đi lúc nào rẻ nhất?</button>
+    <button type="button" class="ai-chip" data-q="Hãng hàng không nào có giá tối ưu nhất cho chặng này và chênh lệch ra sao?">✈ Chọn hãng nào?</button>
+    <button type="button" class="ai-chip" data-q="Phân tích tổng quan kế hoạch chuyến bay hiện tại và đưa ra chiến lược đặt vé tốt nhất.">💡 Chiến lược đặt vé</button>
+  </div>
+
+  <div class="ai-modal-footer">
+    <textarea id="aiModalInput" rows="1" placeholder="Nhập câu hỏi cho AI (Enter để gửi)..." aria-label="Nhập câu hỏi cho trợ lý AI"></textarea>
+    <button type="button" class="ai-send-btn" id="btnModalSend">Gửi</button>
+    <button type="button" class="ai-stop-btn" id="btnModalStop" style="display:none" title="Dừng sinh">■</button>
+  </div>
 </div>
 
 <script src="chart.umd.min.js"></script>
@@ -351,14 +745,90 @@ function staticParts() {
   table("tblFiles", [{ h: "File", k: "file", f: v => `<span class="mono">${v}</span>` }, { h: "Số dòng", k: "rows", n: 1, f: v => nf(v) }, { h: "KB", k: "kb", n: 1, f: v => nf(v, 1) }], D.files);
   $("foot").textContent = `Mô hình dự báo CPI: ${D.meta.cpi_forecast_model}. Hệ số quy đổi Expedia → giá vé thực bán (DOT): ${nf(D.meta.K_expedia_to_dot, 3)}. Hệ số hiệu chỉnh từ backtest 2023: ${nf(D.meta.bias_factor_2023, 3)}. Tỉ giá chuyển đổi: 1 USD = ${nf(USD_VND_RATE)} VNĐ (Vietcombank).`;
 
-  const routes = Object.keys(D.routeFare).sort((a, b) => (D.routeN[b] || 0) - (D.routeN[a] || 0));
-  if ($("selRoute")) $("selRoute").innerHTML = routes.map(r => `<option>${r}</option>`).join("");
   if ($("selMonth")) {
     $("selMonth").innerHTML = D.months.filter(m => m >= "2023-01").map(m => `<option value="${m}">${m.slice(5)}/${m.slice(0, 4)}</option>`).join("");
     $("selMonth").value = "2027-07";
   }
 
+  initRouteDropdowns();
   initAirlineItems();
+}
+
+const AIRPORT_NAMES = {
+  "ATL": "ATL (Atlanta)",
+  "BOS": "BOS (Boston)",
+  "CLT": "CLT (Charlotte)",
+  "DEN": "DEN (Denver)",
+  "DFW": "DFW (Dallas / Fort Worth)",
+  "DTW": "DTW (Detroit)",
+  "EWR": "EWR (New York Newark)",
+  "IAD": "IAD (Washington Dulles)",
+  "JFK": "JFK (New York JFK)",
+  "LAX": "LAX (Los Angeles)",
+  "LGA": "LGA (New York LaGuardia)",
+  "MIA": "MIA (Miami)",
+  "OAK": "OAK (San Francisco Bay / Oakland)",
+  "ORD": "ORD (Chicago O'Hare)",
+  "PHL": "PHL (Philadelphia)",
+  "SFO": "SFO (San Francisco)"
+};
+
+const airportLabel = c => AIRPORT_NAMES[c] || c;
+
+function initRouteDropdowns() {
+  if (!$("selOrigin") || !$("selDest")) return;
+  const allRoutes = Object.keys(D.routeFare || {});
+  const originSet = new Set();
+  allRoutes.forEach(r => {
+    const parts = r.split("-");
+    if (parts[0]) originSet.add(parts[0]);
+  });
+  const origins = Array.from(originSet).sort();
+
+  $("selOrigin").innerHTML = origins.map(o => `<option value="${o}">${airportLabel(o)}</option>`).join("");
+  $("selOrigin").value = origins.includes("BOS") ? "BOS" : origins[0];
+
+  updateDestDropdown("IAD");
+}
+
+function updateDestDropdown(preferredDest) {
+  if (!$("selOrigin") || !$("selDest")) return;
+  const curOrig = $("selOrigin").value;
+  const allRoutes = Object.keys(D.routeFare || {});
+  const dests = allRoutes
+    .filter(r => r.startsWith(curOrig + "-"))
+    .map(r => r.split("-")[1])
+    .filter(Boolean)
+    .sort();
+
+  $("selDest").innerHTML = dests.map(d => `<option value="${d}">${airportLabel(d)}</option>`).join("");
+  if (preferredDest && dests.includes(preferredDest)) {
+    $("selDest").value = preferredDest;
+  } else if (dests.length > 0) {
+    $("selDest").value = dests[0];
+  }
+}
+
+function getRoute() {
+  const orig = $("selOrigin") ? $("selOrigin").value : "BOS";
+  const dest = $("selDest") ? $("selDest").value : "IAD";
+  const r = `${orig}-${dest}`;
+  if (D.routeFare && D.routeFare[r]) return r;
+  const avail = Object.keys(D.routeFare || {}).find(k => k.startsWith(orig + "-"));
+  return avail || Object.keys(D.routeFare || {})[0] || "BOS-IAD";
+}
+
+function swapRoute() {
+  if (!$("selOrigin") || !$("selDest")) return;
+  const curO = $("selOrigin").value;
+  const curD = $("selDest").value;
+  const allRoutes = Object.keys(D.routeFare || {});
+  const hasReverse = allRoutes.some(r => r.startsWith(curD + "-"));
+  if (hasReverse) {
+    $("selOrigin").value = curD;
+    updateDestDropdown(curO);
+    plan();
+  }
 }
 
 function draw() {
@@ -502,7 +972,7 @@ const ML_MODELS = {
     r2: 0.5966,
     mape: 33.13,
     trainTime: "13.1s",
-    desc: "Mô hình LightGBM tối ưu: Nắm bắt chuẩn xác quan hệ phi tuyến giữa các đặc trưng, cho độ chính xác cao nhất (MAE $79.89, R² ~0.60, huấn luyện chỉ 13.1s).",
+    desc: "Mô hình LightGBM: MAE $79.89, R² 0.597, thời gian huấn luyện 13,1 giây trên 80 triệu dòng.",
     curveFn: (c, d) => c,
     multiplier: 1.0,
     isRecommended: true
@@ -516,7 +986,7 @@ const ML_MODELS = {
     r2: 0.5885,
     mape: 33.20,
     trainTime: "1722s",
-    desc: "Mô hình Spark GBT: Cây quyết định tăng cường trên Spark, bám sát xu hướng thị trường nhưng thời gian train lâu gấp 131 lần (MAE $80.37, R² 0.589).",
+    desc: "Mô hình Spark GBT: Cây quyết định tăng cường trên Spark, thời gian huấn luyện 1.722 giây (MAE $80.37, R² 0.589).",
     curveFn: (c, d) => c * (1 + 0.008 * Math.sin(d / 8)),
     multiplier: 1.006,
     isRecommended: false
@@ -530,7 +1000,7 @@ const ML_MODELS = {
     r2: 0.5713,
     mape: 34.18,
     trainTime: "924s",
-    desc: "Mô hình Random Forest: Trung bình hóa 20 cây quyết định, có xu hướng làm phẳng (smoothing) các biến động giá cận ngày (MAE $81.33, R² 0.571).",
+    desc: "Mô hình Random Forest: Trung bình 20 cây quyết định, xu hướng làm phẳng biến động cận ngày (MAE $81.33, R² 0.571).",
     curveFn: (c, d) => 1.0 + (c - 1.0) * 0.88,
     multiplier: 1.018,
     isRecommended: false
@@ -544,7 +1014,7 @@ const ML_MODELS = {
     r2: 0.4757,
     mape: 37.60,
     trainTime: "240s",
-    desc: "Mô hình Linear Regression: Giả định quan hệ tuyến tính, đánh giá thấp (underpredict) mức tăng phi tuyến khi đặt cận ngày 1–7 ngày (MAE $90.89, R² 0.476).",
+    desc: "Mô hình Hồi quy tuyến tính: Giả định tuyến tính, đánh giá thấp mức tăng giá cận ngày 1–7 ngày (MAE $90.89, R² 0.476).",
     curveFn: (c, d) => Math.max(0.85, 1.15 - 0.0035 * d),
     multiplier: 0.985,
     isRecommended: false
@@ -558,14 +1028,53 @@ const ML_MODELS = {
     r2: 0.1250,
     mape: 60.37,
     trainTime: "7.4s",
-    desc: "Mô hình Baseline: Dựa trên trung vị tuyến theo 3 bậc thang thô (1–7 ngày: +18%, 8–30 ngày: +5%, 31–60 ngày: 0%), không phân hóa theo từng ngày (MAE $122.06, R² 0.125).",
+    desc: "Mô hình Baseline: Dựa trên trung vị tuyến theo 3 mốc đặt vé 1–7 ngày, 8–30 ngày, 31–60 ngày (MAE $122.06, R² 0.125).",
     curveFn: (c, d) => (d <= 7 ? 1.18 : (d <= 30 ? 1.05 : 1.0)),
     multiplier: 1.05,
     isRecommended: false
   }
 };
 
-function calcLeg(routeStr, dateStr, aMult, isAll, modelKey = "lgb") {
+const CABIN_CLASSES = {
+  "basic": {
+    id: "basic",
+    name: "Phổ thông tiết kiệm",
+    shortName: "Tiết kiệm",
+    subName: "Basic Economy · Google Flights",
+    mult: 0.62,
+    pctDiff: -38,
+    desc: "Hạng vé tiết kiệm nhất / Không bao gồm hành lý ký gửi (Chuẩn giá tham chiếu Google Flights, rẻ hơn ~38%)."
+  },
+  "main": {
+    id: "main",
+    name: "Phổ thông tiêu chuẩn",
+    shortName: "Phổ thông",
+    subName: "Main Cabin / Coach",
+    mult: 1.0,
+    pctDiff: 0,
+    desc: "Hạng vé phổ thông tiêu chuẩn (Expedia Median) bao gồm hành lý xách tay và chọn chỗ ngồi cơ bản."
+  },
+  "premium": {
+    id: "premium",
+    name: "Phổ thông đặc biệt",
+    shortName: "Cao cấp",
+    subName: "Premium Economy",
+    mult: 1.38,
+    pctDiff: 38,
+    desc: "Khoang ghế rộng rãi hơn, có lối đi riêng và ưu tiên làm thủ tục (+38%)."
+  },
+  "first": {
+    id: "first",
+    name: "Thương gia / Hạng nhất",
+    shortName: "Thương gia",
+    subName: "Business / First",
+    mult: 2.15,
+    pctDiff: 115,
+    desc: "Khoang thương gia / hạng nhất cao cấp, dịch vụ trọn gói và phòng chờ VIP (+115%)."
+  }
+};
+
+function calcLeg(routeStr, dateStr, aMult, isAll, modelKey = "lgb", cabinKey = "basic") {
   const parts = dateStr.split("-").map(Number);
   const m = dateStr.slice(0, 7);
   const marketMed = (D.kpi && D.kpi.gia_trung_vi) ? parseFloat(D.kpi.gia_trung_vi) : 305.2;
@@ -590,22 +1099,27 @@ function calcLeg(routeStr, dateStr, aMult, isAll, modelKey = "lgb") {
   const safeMi = mi >= 0 ? mi : D.months.length - 1;
   const baseMonthLevel = (D.routeFare[routeStr] && D.routeFare[routeStr][safeMi]) ? D.routeFare[routeStr][safeMi] : 300.0;
 
-  // 4. Tổng hợp mức giá ngày bay cất cánh
+  // 4. Hạng vé (Cabin Class)
+  const cabinCfg = CABIN_CLASSES[cabinKey] || CABIN_CLASSES["basic"];
+  const cabinMult = cabinCfg.mult;
+
+  // 5. Tổng hợp mức giá ngày bay cất cánh
   const modelCfg = ML_MODELS[modelKey] || ML_MODELS["lgb"];
-  const combinedDayFactor = aMult * dowMult * holMult;
+  const combinedDayFactor = aMult * dowMult * holMult * cabinMult;
   const level = baseMonthLevel * combinedDayFactor * modelCfg.multiplier;
   const lgbLevel = baseMonthLevel * combinedDayFactor;
 
-  // 5. So sánh 2022 nếu có
+  // 6. So sánh 2022 nếu có
   const m22 = "2022-" + m.slice(5), i22 = D.months.indexOf(m22);
-  const level22 = (i22 >= 0 && D.routeFare[routeStr]) ? D.routeFare[routeStr][i22] * (isAll ? 1.0 : aMult) : null;
+  const level22 = (i22 >= 0 && D.routeFare[routeStr]) ? D.routeFare[routeStr][i22] * (isAll ? 1.0 : aMult) * cabinMult : null;
   const rawCurve = D.curve[routeStr] || [];
   const curve = rawCurve.map((c, i) => modelCfg.curveFn(c, i + 1));
   const lgbCurve = rawCurve;
   const at = d => level * (curve[d - 1] || 1);
   const atLgb = d => lgbLevel * (lgbCurve[d - 1] || 1);
+  const atLgbBase = d => baseMonthLevel * cabinMult * (lgbCurve[d - 1] || 1);
 
-  return { route: routeStr, dateStr, m, dowName, dowPct, dowMult, holInfo, holMult, holPct, baseMonthLevel, level, lgbLevel, level22, curve, at, atLgb, modelCfg };
+  return { route: routeStr, dateStr, m, dowName, dowPct, dowMult, holInfo, holMult, holPct, baseMonthLevel, level, lgbLevel, level22, curve, at, atLgb, atLgbBase, modelCfg, cabinCfg, cabinMult };
 }
 
 const AIRLINE_COLORS = {
@@ -716,6 +1230,14 @@ function setupAirlineDropdownEvents() {
         btn.setAttribute("aria-expanded", "false");
       }
     });
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape" && wrap.classList.contains("open")) {
+        wrap.classList.remove("open");
+        popover.style.display = "none";
+        btn.setAttribute("aria-expanded", "false");
+        btn.focus();
+      }
+    });
   }
 
   if (list) {
@@ -784,12 +1306,14 @@ function plan(t = tok()) {
   initFlightDates();
   initAirlineItems();
 
-  const r = $("selRoute") ? $("selRoute").value : "BOS-IAD";
+  const r = getRoute();
+  if (typeof updateAiIntroRoute === "function") updateAiIntroRoute();
   const dateStr = ($("inpDate") && $("inpDate").value) ? $("inpDate").value : getTodayDateStr();
   const isRT = $("selTripType") && $("selTripType").value === "roundtrip";
 
   if ($("lblReturnDate")) $("lblReturnDate").style.display = isRT ? "" : "none";
-  if ($("routeLegSuffix")) $("routeLegSuffix").style.display = isRT ? "" : "none";
+  if ($("originLegSuffix")) $("originLegSuffix").style.display = isRT ? "" : "none";
+  if ($("destLegSuffix")) $("destLegSuffix").style.display = isRT ? "" : "none";
   if ($("lblDepDate")) $("lblDepDate").textContent = isRT ? "Ngày đi (Chiều đi)" : "Ngày bay";
 
   const checkedAirlines = airlineItems.filter(a => a.checked);
@@ -797,8 +1321,9 @@ function plan(t = tok()) {
   const activeAirlines = checkedAirlines.length > 0 ? checkedAirlines : [airlineItems[0]];
 
   const modelKey = $("selModel") ? $("selModel").value : "lgb";
+  const cabinKey = $("selCabin") ? $("selCabin").value : "basic";
   // Chiều đi cơ sở (hệ số hãng 1.0)
-  const out = calcLeg(r, dateStr, 1.0, true, modelKey);
+  const out = calcLeg(r, dateStr, 1.0, true, modelKey, cabinKey);
   const curve = out.curve;
   const days = curve.map((_, i) => i + 1);
 
@@ -826,8 +1351,8 @@ function plan(t = tok()) {
 
     const card1Val = activeAirlines.length === 1 ? money(levels[0]) : `${money(minLevel)} – ${money(maxLevel)}`;
     const card1Lbl = activeAirlines.length === 1
-      ? `Dự báo bay ${fmtDate(out.dateStr)} (${activeAirlines[0].name})`
-      : `Khoảng giá ${activeAirlines.length} hãng (bay ${fmtDate(out.dateStr)})`;
+      ? `Dự báo bay ${fmtDate(out.dateStr)} · ${out.cabinCfg.shortName} (${activeAirlines[0].name})`
+      : `Khoảng giá ${activeAirlines.length} hãng · ${out.cabinCfg.shortName} (bay ${fmtDate(out.dateStr)})`;
 
     const card4Val = activeAirlines.length === 1
       ? activeAirlines[0].name
@@ -844,6 +1369,7 @@ function plan(t = tok()) {
 
     $("board").innerHTML = [
       [card1Val, card1Lbl, "now"],
+      [out.cabinCfg.name, `${out.cabinCfg.pctDiff >= 0 ? "+" : ""}${out.cabinCfg.pctDiff}% so với phổ thông (${out.cabinCfg.shortName})`],
       [out.dowName, `${out.dowPct >= 0 ? "+" : ""}${out.dowPct}% do thứ trong tuần`],
       [out.holInfo.isHoliday ? out.holInfo.name : "Ngày thường", out.holInfo.isHoliday ? `+${out.holPct}% phụ trội kỳ nghỉ lễ` : "Không trùng lịch lễ Mỹ", out.holInfo.isHoliday ? "rush" : ""],
       [out.modelCfg.name, `R² ${out.modelCfg.r2.toFixed(3)} · MAE $${out.modelCfg.mae.toFixed(1)}${out.modelCfg.isRecommended ? " (Tốt nhất)" : ""}`, out.modelCfg.isRecommended ? "accent" : ""],
@@ -854,7 +1380,7 @@ function plan(t = tok()) {
 
     const rateNote = curCurrency === "VND" ? ` (Quy đổi tỉ giá Vietcombank: 1 USD = ${nf(USD_VND_RATE)} ₫)` : "";
     if ($("planNote")) {
-      $("planNote").textContent = `${out.modelCfg.desc} Giá dự báo (${curCurrency}) = mức giá Expedia 2022 của tuyến × chỉ số CPI vé máy bay tháng bay × hệ số hiệu chỉnh backtest 2023 × hệ số đường cong ${out.modelCfg.name} theo ngày đặt trước × hệ số từng hãng bay. Đã gồm thuế phí, vé một chiều.${rateNote}`;
+      $("planNote").textContent = `${out.modelCfg.desc} Hạng vé: ${out.cabinCfg.name} (${out.cabinCfg.desc}). Giá dự báo (${curCurrency}) = mức giá Expedia 2022 của tuyến × chỉ số CPI vé máy bay tháng bay × hệ số hiệu chỉnh backtest 2023 × hệ số đường cong ${out.modelCfg.name} theo ngày đặt trước × hệ số từng hãng bay × hệ số hạng vé (${out.cabinMult}x). Đã gồm thuế phí, vé một chiều.${rateNote}`;
     }
 
     const datasets = activeAirlines.map(air => {
@@ -872,9 +1398,19 @@ function plan(t = tok()) {
       };
     });
 
+    datasets.push({
+      label: `LightGBM Baseline (Trước khi cộng % giá)`,
+      data: days.map(d => toCurr(out.atLgbBase(d))),
+      borderColor: "#64748b",
+      borderDash: [6, 4],
+      borderWidth: 2,
+      pointRadius: 0,
+      pointHoverRadius: 5
+    });
+
     if (modelKey !== "lgb") {
       datasets.push({
-        label: `LightGBM (Chuẩn tối ưu tham chiếu · R² 0.597)`,
+        label: `LightGBM (Mô hình tham chiếu · R² 0.597)`,
         data: days.map(d => toCurr(out.atLgb(d))),
         borderColor: "#3987e5",
         borderDash: [5, 4],
@@ -946,7 +1482,7 @@ function plan(t = tok()) {
     // === KHỨ HỒI ===
     const rRev = r.split("-").reverse().join("-");
     const returnDateStr = ($("inpReturnDate") && $("inpReturnDate").value) ? $("inpReturnDate").value : getReturnDateStr(dateStr, 7);
-    const ret = calcLeg(rRev, returnDateStr, 1.0, true, modelKey);
+    const ret = calcLeg(rRev, returnDateStr, 1.0, true, modelKey, cabinKey);
 
     const baseTotalLevel = out.level + ret.level;
     const rtLevels = activeAirlines.map(a => baseTotalLevel * a.mult);
@@ -970,8 +1506,8 @@ function plan(t = tok()) {
 
     const card1Val = activeAirlines.length === 1 ? money(rtLevels[0]) : `${money(minRTLevel)} – ${money(maxRTLevel)}`;
     const card1Lbl = activeAirlines.length === 1
-      ? `Tổng vé khứ hồi (${fmtDate(out.dateStr)} ⇄ ${fmtDate(ret.dateStr)}) · ${activeAirlines[0].name}`
-      : `Khoảng giá khứ hồi ${activeAirlines.length} hãng (${fmtDate(out.dateStr)} ⇄ ${fmtDate(ret.dateStr)})`;
+      ? `Tổng vé khứ hồi (${fmtDate(out.dateStr)} ⇄ ${fmtDate(ret.dateStr)}) · ${out.cabinCfg.shortName} (${activeAirlines[0].name})`
+      : `Khoảng giá khứ hồi ${activeAirlines.length} hãng · ${out.cabinCfg.shortName} (${fmtDate(out.dateStr)} ⇄ ${fmtDate(ret.dateStr)})`;
 
     const card4Val = activeAirlines.length === 1
       ? activeAirlines[0].name
@@ -989,6 +1525,7 @@ function plan(t = tok()) {
     $("board").innerHTML = [
       [card1Val, card1Lbl, "now"],
       [`${money(out.level)} + ${money(ret.level)}`, `Đi (${r}): ${money(out.level)} · Về (${rRev}): ${money(ret.level)}`],
+      [out.cabinCfg.name, `Hạng vé (${out.cabinCfg.pctDiff >= 0 ? "+" : ""}${out.cabinCfg.pctDiff}% so với phổ thông)`],
       [`Đi: ${out.dowName} · Về: ${ret.dowName}`, `Thứ bay (Đi: ${out.dowPct >= 0 ? "+" : ""}${out.dowPct}% | Về: ${ret.dowPct >= 0 ? "+" : ""}${ret.dowPct}%)`],
       [out.modelCfg.name, `R² ${out.modelCfg.r2.toFixed(3)} · MAE $${out.modelCfg.mae.toFixed(1)}${out.modelCfg.isRecommended ? " (Tốt nhất)" : ""}`, out.modelCfg.isRecommended ? "accent" : ""],
       [(out.holInfo.isHoliday || ret.holInfo.isHoliday) ? "Kỳ nghỉ lễ" : "Ngày thường", holStr, (out.holInfo.isHoliday || ret.holInfo.isHoliday) ? "rush" : ""],
@@ -998,7 +1535,7 @@ function plan(t = tok()) {
 
     const rateNote = curCurrency === "VND" ? ` (Quy đổi tỉ giá Vietcombank: 1 USD = ${nf(USD_VND_RATE)} ₫)` : "";
     if ($("planNote")) {
-      $("planNote").textContent = `${out.modelCfg.desc} Vé khứ hồi (${curCurrency}) = Chiều đi (${r}, bay ${out.dateStr}) + Chiều về (${rRev}, bay ${ret.dateStr}). Chiều đi và chiều về được tính toán độc lập theo mô hình ${out.modelCfg.name} và nhân theo hệ số định giá riêng của từng hãng.${rateNote}`;
+      $("planNote").textContent = `${out.modelCfg.desc} Hạng vé: ${out.cabinCfg.name} (${out.cabinCfg.desc}). Vé khứ hồi (${curCurrency}) = Chiều đi (${r}, bay ${out.dateStr}) + Chiều về (${rRev}, bay ${ret.dateStr}). Chiều đi và chiều về được tính toán độc lập theo mô hình ${out.modelCfg.name}, nhân theo hệ số từng hãng và hệ số hạng vé (${out.cabinMult}x).${rateNote}`;
     }
 
     const datasets = activeAirlines.map(air => {
@@ -1016,9 +1553,19 @@ function plan(t = tok()) {
       };
     });
 
+    datasets.push({
+      label: `LightGBM Baseline (Khứ hồi · Trước khi cộng % giá)`,
+      data: days.map(d => toCurr(out.atLgbBase(d) + ret.atLgbBase(d))),
+      borderColor: "#64748b",
+      borderDash: [6, 4],
+      borderWidth: 2,
+      pointRadius: 0,
+      pointHoverRadius: 5
+    });
+
     if (modelKey !== "lgb") {
       datasets.push({
-        label: `LightGBM (Chuẩn tối ưu tham chiếu · R² 0.597)`,
+        label: `LightGBM (Mô hình tham chiếu · R² 0.597)`,
         data: days.map(d => toCurr(out.atLgb(d) + ret.atLgb(d))),
         borderColor: "#3987e5",
         borderDash: [5, 4],
@@ -1083,17 +1630,211 @@ function plan(t = tok()) {
       })
     });
   }
+
+  renderCalendar3(r, modelKey, activeAirlines, isRT, dateStr, cabinKey);
+}
+
+let calBaseMonth = null;
+
+function formatCalFare(valUSD) {
+  if (valUSD == null || isNaN(valUSD)) return "–";
+  if (curCurrency === "VND") {
+    const vnd = Math.round(valUSD * USD_VND_RATE);
+    if (vnd >= 1e6) {
+      const tr = (vnd / 1e6).toFixed(1).replace(".", ",");
+      return tr.endsWith(",0") ? tr.slice(0, -2) + " tr" : tr + " tr";
+    }
+    return Math.round(vnd / 1000) + "k";
+  }
+  return "$" + Math.round(valUSD);
+}
+
+function shiftMonth(mStr, delta) {
+  const [y, m] = mStr.split("-").map(Number);
+  const d = new Date(Date.UTC(y, m - 1 + delta, 1));
+  const pad = n => String(n).padStart(2, "0");
+  let res = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}`;
+  if (res < "2023-01") res = "2023-01";
+  if (res > "2027-10") res = "2027-10";
+  return res;
+}
+
+function onCalDaySelect(dateStr) {
+  if ($("inpDate")) {
+    $("inpDate").value = dateStr;
+    const isRT = $("selTripType") && $("selTripType").value === "roundtrip";
+    if (isRT && $("inpReturnDate")) {
+      const parts = dateStr.split("-").map(Number);
+      const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+      d.setUTCDate(d.getUTCDate() + 7);
+      let retStr = d.toISOString().slice(0, 10);
+      if (retStr > "2027-12-31") retStr = "2027-12-31";
+      $("inpReturnDate").value = retStr;
+    }
+    plan();
+  }
+}
+
+function setupCalendarNavEvents() {
+  const btnPrev = $("btnCalPrev");
+  const btnNext = $("btnCalNext");
+  const btnReset = $("btnCalReset");
+
+  if (btnPrev && !btnPrev.dataset.bound) {
+    btnPrev.dataset.bound = "1";
+    btnPrev.onclick = () => {
+      const cur = calBaseMonth || ($("inpDate") ? $("inpDate").value : getTodayDateStr()).slice(0, 7);
+      calBaseMonth = shiftMonth(cur, -3);
+      plan();
+    };
+  }
+  if (btnNext && !btnNext.dataset.bound) {
+    btnNext.dataset.bound = "1";
+    btnNext.onclick = () => {
+      const cur = calBaseMonth || ($("inpDate") ? $("inpDate").value : getTodayDateStr()).slice(0, 7);
+      calBaseMonth = shiftMonth(cur, 3);
+      plan();
+    };
+  }
+  if (btnReset && !btnReset.dataset.bound) {
+    btnReset.dataset.bound = "1";
+    btnReset.onclick = () => {
+      calBaseMonth = ($("inpDate") ? $("inpDate").value : getTodayDateStr()).slice(0, 7);
+      plan();
+    };
+  }
+}
+
+function renderCalendar3(r, modelKey, activeAirlines, isRT, selDateStr, cabinKey = "basic") {
+  const container = $("cal3Months");
+  if (!container) return;
+
+  setupCalendarNavEvents();
+
+  if (!calBaseMonth) {
+    calBaseMonth = (selDateStr || getTodayDateStr()).slice(0, 7);
+  }
+
+  const cheapestAir = (activeAirlines && activeAirlines.length > 0)
+    ? activeAirlines.slice().sort((a, b) => a.mult - b.mult)[0]
+    : { name: "TB thị trường", mult: 1.0 };
+  const minMult = cheapestAir.mult;
+  const cabinCfg = CABIN_CLASSES[cabinKey] || CABIN_CLASSES["basic"];
+
+  if ($("calSubNote")) {
+    const tripNote = isRT ? "khứ hồi (7 ngày)" : "một chiều";
+    $("calSubNote").textContent = `Giá vé ${tripNote} hạng ${cabinCfg.name} (${cabinCfg.shortName}) thấp nhất theo mô hình (Hãng rẻ nhất: ${cheapestAir.name}). Bấm vào ngày bất kỳ để xem chi tiết.`;
+  }
+
+  const months = [
+    calBaseMonth,
+    shiftMonth(calBaseMonth, 1),
+    shiftMonth(calBaseMonth, 2)
+  ];
+
+  const pad = n => String(n).padStart(2, "0");
+  const todayStr = getTodayDateStr();
+  const rRev = isRT ? r.split("-").reverse().join("-") : "";
+  const dowNames = ["Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy"];
+
+  let html = "";
+
+  months.forEach(mStr => {
+    const [y, mNum] = mStr.split("-").map(Number);
+    const firstDow = new Date(Date.UTC(y, mNum - 1, 1)).getUTCDay(); // 0 = CN
+    const totalDays = new Date(Date.UTC(y, mNum, 0)).getUTCDate();
+
+    const daysData = [];
+    for (let d = 1; d <= totalDays; d++) {
+      const dStr = `${y}-${pad(mNum)}-${pad(d)}`;
+      const outDay = calcLeg(r, dStr, 1.0, true, modelKey, cabinKey);
+
+      const diffDays = Math.round((new Date(dStr + "T00:00:00Z") - new Date(todayStr + "T00:00:00Z")) / 86400000);
+      const bookAdv = Math.max(1, Math.min(60, diffDays > 0 ? diffDays : 30));
+
+      let fare = 0;
+      if (!isRT) {
+        fare = outDay.at(bookAdv) * minMult;
+      } else {
+        const retDStr = getReturnDateStr(dStr, 7);
+        const retDay = calcLeg(rRev, retDStr, 1.0, true, modelKey, cabinKey);
+        fare = (outDay.at(bookAdv) + retDay.at(bookAdv)) * minMult;
+      }
+
+      const utcDay = new Date(dStr + "T00:00:00Z").getUTCDay();
+      daysData.push({
+        day: d,
+        dateStr: dStr,
+        fare: fare,
+        dowName: dowNames[utcDay],
+        holInfo: outDay.holInfo
+      });
+    }
+
+    const minMonthFare = Math.min(...daysData.map(x => x.fare));
+
+    let cellsHtml = "";
+    for (let i = 0; i < firstDow; i++) {
+      cellsHtml += `<div class="cal-cell empty" aria-hidden="true"></div>`;
+    }
+
+    daysData.forEach(d => {
+      const isSelected = d.dateStr === selDateStr;
+      const isBest = Math.abs(d.fare - minMonthFare) < 0.001;
+      const cls = ["cal-cell", isSelected ? "selected" : "", isBest ? "best-price" : ""].filter(Boolean).join(" ");
+      const tip = `${d.dowName}, ${d.day}/${mNum}/${y}: ${money(d.fare)} (${cabinCfg.shortName} · ${cheapestAir.name}${d.holInfo && d.holInfo.isHoliday ? " · " + d.holInfo.name : ""})`;
+
+      cellsHtml += `
+        <button type="button" class="${cls}" data-date="${d.dateStr}" title="${tip}" aria-label="${tip}">
+          <span class="day-num">${d.day}</span>
+          <span class="day-price">${formatCalFare(d.fare)}</span>
+        </button>
+      `;
+    });
+
+    html += `
+      <div class="cal-month">
+        <div class="cal-month-header">
+          <span class="cal-month-title">Tháng ${mNum}/${y}</span>
+          <span class="cal-month-stat">Từ ${formatCalFare(minMonthFare)}</span>
+        </div>
+        <div class="cal-weekdays" aria-hidden="true">
+          <span>CN</span><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span>
+        </div>
+        <div class="cal-days-grid">
+          ${cellsHtml}
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+
+  container.querySelectorAll(".cal-cell:not(.empty)").forEach(btn => {
+    btn.onclick = () => {
+      const dt = btn.getAttribute("data-date");
+      if (dt) onCalDaySelect(dt);
+    };
+  });
 }
 
 staticParts();
 setupAirlineDropdownEvents();
 draw();
-if ($("selRoute")) $("selRoute").addEventListener("change", () => plan());
+if ($("selOrigin")) $("selOrigin").addEventListener("change", () => {
+  const curDest = $("selDest") ? $("selDest").value : null;
+  updateDestDropdown(curDest);
+  plan();
+});
+if ($("selDest")) $("selDest").addEventListener("change", () => plan());
+if ($("btnSwapRoute")) $("btnSwapRoute").addEventListener("click", () => swapRoute());
 if ($("selModel")) $("selModel").addEventListener("change", () => plan());
+if ($("selCabin")) $("selCabin").addEventListener("change", () => plan());
 if ($("selTripType")) $("selTripType").addEventListener("change", () => {
   const isRT = $("selTripType").value === "roundtrip";
   if ($("lblReturnDate")) $("lblReturnDate").style.display = isRT ? "" : "none";
-  if ($("routeLegSuffix")) $("routeLegSuffix").style.display = isRT ? "" : "none";
+  if ($("originLegSuffix")) $("originLegSuffix").style.display = isRT ? "" : "none";
+  if ($("destLegSuffix")) $("destLegSuffix").style.display = isRT ? "" : "none";
   if ($("lblDepDate")) $("lblDepDate").textContent = isRT ? "Ngày đi (Chiều đi)" : "Ngày bay";
   if (isRT && $("inpDate") && $("inpReturnDate")) {
     $("inpReturnDate").min = $("inpDate").value;
@@ -1106,6 +1847,9 @@ if ($("selTripType")) $("selTripType").addEventListener("change", () => {
   plan();
 });
 if ($("inpDate")) $("inpDate").addEventListener("change", () => {
+  if ($("inpDate").value) {
+    calBaseMonth = $("inpDate").value.slice(0, 7);
+  }
   if ($("selTripType") && $("selTripType").value === "roundtrip" && $("inpReturnDate") && $("inpDate")) {
     $("inpReturnDate").min = $("inpDate").value;
     if ($("inpReturnDate").value < $("inpDate").value) {
@@ -1125,6 +1869,457 @@ function setCurrency(newCur) {
 }
 if ($("selCurrency")) $("selCurrency").addEventListener("change", e => setCurrency(e.target.value));
 if ($("selGlobalCurrency")) $("selGlobalCurrency").addEventListener("change", e => setCurrency(e.target.value));
+
+// ==========================================
+// TRỢ LÝ AI COPILOT (QWEN 2.5 / OLLAMA LOCAL)
+// ==========================================
+let aiAbortCtrl = null;
+const aiChatHistory = [];
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function renderSimpleMarkdown(md) {
+  let h = escapeHtml(md);
+  h = h.replace(/```([\s\S]*?)```/g, '<pre style="background:var(--chip);padding:8px;border-radius:6px;overflow-x:auto"><code>$1</code></pre>');
+  h = h.replace(/`([^`]+)`/g, '<code style="background:var(--chip);padding:2px 4px;border-radius:4px;font-family:var(--f-mono)">$1</code>');
+  h = h.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  h = h.replace(/^\s*[-*]\s+(.*)$/gm, '<li style="margin-left:18px">$1</li>');
+  h = h.replace(/^\s*\d+\.\s+(.*)$/gm, '<li style="margin-left:18px">$1</li>');
+  h = h.replace(/\n\n+/g, '</p><p style="margin:6px 0">');
+  h = h.replace(/\n/g, '<br>');
+  return `<p style="margin:0">${h}</p>`;
+}
+
+function updateAiIntroRoute() {
+  const r = getRoute();
+  const [o, d] = r.split("-");
+  const origName = airportLabel(o);
+  const destName = airportLabel(d);
+  const routeText = `${origName} → ${destName}`;
+  const introEl = $("aiIntroRoute");
+  if (introEl) introEl.textContent = routeText;
+
+  const modalRoute = $("aiModalRoute");
+  if (modalRoute) modalRoute.textContent = `${o} → ${d}`;
+
+  const cabinKey = $("selCabin") ? $("selCabin").value : "basic";
+  const cabinCfg = CABIN_CLASSES[cabinKey] || CABIN_CLASSES["basic"];
+  const modalCabin = $("aiModalCabinTag");
+  if (modalCabin) modalCabin.textContent = cabinCfg.name;
+
+  const modalFare = $("aiModalFareTag");
+  if (modalFare) {
+    try {
+      const depDateStr = ($("inpDate") && $("inpDate").value) ? $("inpDate").value : getTodayDateStr();
+      const modelKey = $("selModel") ? $("selModel").value : "lgb";
+      const isRT = $("selTripType") && $("selTripType").value === "roundtrip";
+      const out = calcLeg(r, depDateStr, 1.0, true, modelKey, cabinKey);
+      let total = out.level;
+      if (isRT) {
+        const retDateStr = ($("inpReturnDate") && $("inpReturnDate").value) ? $("inpReturnDate").value : getReturnDateStr(depDateStr, 7);
+        const rRev = r.split("-").reverse().join("-");
+        const ret = calcLeg(rRev, retDateStr, 1.0, true, modelKey, cabinKey);
+        total += ret.level;
+      }
+      modalFare.innerHTML = `Dự báo: <b>${money(total)}</b>`;
+    } catch (_) {}
+  }
+}
+
+function buildFlightAiContext() {
+  const r = getRoute();
+  const [orig, dest] = r.split("-");
+  const origName = airportLabel(orig);
+  const destName = airportLabel(dest);
+  const isRT = $("selTripType") && $("selTripType").value === "roundtrip";
+  const tripType = isRT ? "Khứ hồi" : "Một chiều";
+  const cabinKey = $("selCabin") ? $("selCabin").value : "basic";
+  const cabinCfg = CABIN_CLASSES[cabinKey] || CABIN_CLASSES["basic"];
+  const modelKey = $("selModel") ? $("selModel").value : "lgb";
+  const modelCfg = ML_MODELS[modelKey] || ML_MODELS["lgb"];
+  const depDateStr = ($("inpDate") && $("inpDate").value) ? $("inpDate").value : getTodayDateStr();
+  const retDateStr = isRT ? (($("inpReturnDate") && $("inpReturnDate").value) ? $("inpReturnDate").value : getReturnDateStr(depDateStr, 7)) : null;
+
+  const out = calcLeg(r, depDateStr, 1.0, true, modelKey, cabinKey);
+  let ret = null;
+  if (isRT) {
+    const rRev = r.split("-").reverse().join("-");
+    ret = calcLeg(rRev, retDateStr, 1.0, true, modelKey, cabinKey);
+  }
+
+  const checkedAirlines = airlineItems.filter(a => a.checked);
+  const activeAirlines = checkedAirlines.length > 0 ? checkedAirlines : [airlineItems[0]];
+  const cheapestAir = activeAirlines.slice().sort((a, b) => a.mult - b.mult)[0];
+  const priciestAir = activeAirlines.slice().sort((a, b) => b.mult - a.mult)[0];
+
+  const totalLevel = isRT ? (out.level + ret.level) : out.level;
+  const fareAt45 = isRT ? (out.at(45) + ret.at(45)) : out.at(45);
+  const fareAt3 = isRT ? (out.at(3) + ret.at(3)) : out.at(3);
+  const rushPct = Math.round((fareAt3 / fareAt45 - 1) * 100);
+
+  return `
+[DỮ LIỆU DỰ BÁO VÉ MÁY BAY TỪ DASHBOARD (CHÍNH XÁC TỪ MÔ HÌNH ML)]:
+- Tuyến bay: ${r} (${origName} đến ${destName})
+- Hành trình: ${tripType}${isRT ? ` (Đi: ${depDateStr} ⇄ Về: ${retDateStr})` : ` (Ngày bay: ${depDateStr})`}
+- Hạng vé lựa chọn: ${cabinCfg.name} (${cabinCfg.desc}, hệ số định giá ${cabinCfg.mult}x)
+- Ngày bay: ${depDateStr} (${out.dowName}, phụ trội theo thứ: ${out.dowPct >= 0 ? "+" : ""}${out.dowPct}%, phụ trội ngày lễ: ${out.holInfo.isHoliday ? out.holInfo.name + " +" + out.holPct + "%" : "Không"})
+- Mức giá dự báo trung bình hiện tại: ${money(totalLevel)}
+- Hãng rẻ nhất: ${cheapestAir.name} (khoảng ${money(totalLevel * cheapestAir.mult)})
+- Hãng đắt nhất: ${priciestAir.name} (khoảng ${money(totalLevel * priciestAir.mult)})
+- Giá nếu đặt trước 45 ngày (sớm): khoảng ${money(fareAt45 * cheapestAir.mult)}
+- Giá nếu đặt trước 3 ngày (gấp): khoảng ${money(fareAt3 * cheapestAir.mult)} (đắt hơn ${rushPct}%)
+- Mô hình Machine Learning đang tính: ${modelCfg.name} (R² = ${modelCfg.r2.toFixed(3)}, MAE = $${modelCfg.mae.toFixed(1)})
+- Tỷ giá quy đổi: 1 USD = ${nf(USD_VND_RATE)} VNĐ
+- Tiền tệ đang xem: ${curCurrency}
+`.trim();
+}
+
+async function checkOllamaHealth() {
+  let endpoint = ($("inpAiEndpoint") ? $("inpAiEndpoint").value.trim() : "http://localhost:11434") || "http://localhost:11434";
+  const pill = $("aiStatusPill");
+  const txt = $("aiStatusText");
+  const msg = $("aiConnMsg");
+  const modalSub = $("aiModalSub");
+
+  async function fetchTags(ep) {
+    const res = await fetch(`${ep}/api/tags`, { method: "GET" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  }
+
+  let data = null;
+  try {
+    data = await fetchTags(endpoint);
+  } catch (err) {
+    if (window.location.protocol.startsWith("http") && endpoint !== window.location.origin) {
+      try {
+        data = await fetchTags(window.location.origin);
+        endpoint = window.location.origin;
+        if ($("inpAiEndpoint")) $("inpAiEndpoint").value = endpoint;
+      } catch (_) {}
+    }
+    if (!data) {
+      if (pill) pill.className = "ai-status-pill error";
+      if (txt) txt.textContent = "Offline (Ollama)";
+      if (modalSub) modalSub.innerHTML = `🔴 Offline (Ollama)`;
+      if (msg) {
+        msg.innerHTML = `Không thể kết nối Ollama (${escapeHtml(err.message)}). Nếu mở qua <code>file:///</code>, hãy chạy <code>run_dashboard.bat</code> hoặc đặt <code>OLLAMA_ORIGINS=*</code>.`;
+        msg.style.color = "var(--urgent)";
+      }
+      return;
+    }
+  }
+
+  const models = data.models || [];
+  const modelNames = models.map(m => m.name || m.model);
+
+  let chosenModel = "qwen2.5:7b-instruct";
+  if (modelNames.includes("qwen2.5:7b-instruct")) {
+    chosenModel = "qwen2.5:7b-instruct";
+  } else {
+    const qwen = modelNames.find(m => m.toLowerCase().includes("qwen"));
+    if (qwen) chosenModel = qwen;
+    else if (modelNames.length > 0) chosenModel = modelNames[0];
+  }
+
+  if ($("inpAiModel")) $("inpAiModel").value = chosenModel;
+  if (pill) pill.className = "ai-status-pill online";
+  if (txt) txt.textContent = `Online · ${chosenModel}`;
+  if (modalSub) modalSub.innerHTML = `🟢 ${escapeHtml(chosenModel)} (Ollama local)`;
+  if (msg) {
+    msg.textContent = `Đã kết nối thành công tới Ollama. Đang dùng model: ${chosenModel}.`;
+    msg.style.color = "var(--good)";
+  }
+}
+
+async function sendAiPrompt(userText) {
+  if (!userText || !userText.trim()) return;
+  const q = userText.trim();
+  const chatBoxes = [$("aiChatBox"), $("aiModalChatBox")].filter(Boolean);
+  const inputs = [$("aiUserInput"), $("aiModalInput")].filter(Boolean);
+  const sendBtns = [$("btnAiSend"), $("btnModalSend")].filter(Boolean);
+  const stopBtns = [$("btnAiStop"), $("btnModalStop")].filter(Boolean);
+
+  inputs.forEach(inp => { inp.value = ""; });
+
+  const botElements = [];
+  chatBoxes.forEach(chatBox => {
+    const userMsgEl = document.createElement("div");
+    userMsgEl.className = "ai-msg user";
+    userMsgEl.innerHTML = `
+      <div class="ai-msg-avatar" aria-hidden="true">👤</div>
+      <div class="ai-msg-bubble"><p style="margin:0">${escapeHtml(q)}</p></div>
+    `;
+    chatBox.appendChild(userMsgEl);
+
+    const botMsgEl = document.createElement("div");
+    botMsgEl.className = "ai-msg bot";
+    botMsgEl.innerHTML = `
+      <div class="ai-msg-avatar" aria-hidden="true">🤖</div>
+      <div class="ai-msg-bubble">
+        <div class="ai-typing-indicator"><span></span><span></span><span></span></div>
+        <div class="ai-content-body" style="display:none"></div>
+      </div>
+    `;
+    chatBox.appendChild(botMsgEl);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    botElements.push({
+      typing: botMsgEl.querySelector(".ai-typing-indicator"),
+      body: botMsgEl.querySelector(".ai-content-body"),
+      box: chatBox
+    });
+  });
+
+  sendBtns.forEach(b => { b.style.display = "none"; });
+  stopBtns.forEach(b => { b.style.display = "inline-block"; });
+
+  aiAbortCtrl = new AbortController();
+
+  const endpoint = ($("inpAiEndpoint") ? $("inpAiEndpoint").value.trim() : "http://localhost:11434") || "http://localhost:11434";
+  const model = ($("inpAiModel") ? $("inpAiModel").value.trim() : "qwen2.5:7b-instruct") || "qwen2.5:7b-instruct";
+  const flightCtx = buildFlightAiContext();
+
+  const systemPrompt = `Bạn là Trợ lý AI Cố vấn Vé máy bay thông minh trên hệ thống dự báo Machine Learning.
+Nhiệm vụ của bạn:
+1. Trả lời các câu hỏi về: thời điểm nên mua vé tốt nhất, ngày/thứ nên bay tiết kiệm nhất, so sánh hãng bay, phân tích xu hướng giá.
+2. DỰA TRÊN DỮ LIỆU DỰ BÁO CỤ THỂ ĐƯỢC CUNG CẤP DƯỚI ĐÂY (dữ liệu từ mô hình LightGBM/Spark GBT trên 80 triệu dòng vé máy bay).
+3. Đưa ra lời khuyên thiết thực, rõ ràng, ngắn gọn, có dẫn chứng số tiền (${curCurrency}) và % chênh lệch từ dữ liệu.
+4. Trình bày đẹp mắt với gạch đầu dòng, in đậm số tiền, phong cách chuyên nghiệp, ngôn ngữ tiếng Việt tự nhiên, thân thiện.
+
+${flightCtx}`;
+
+  const messagesPayload = [
+    { role: "system", content: systemPrompt },
+    ...aiChatHistory.slice(-6),
+    { role: "user", content: q }
+  ];
+
+  let fullResponse = "";
+
+  try {
+    const res = await fetch(`${endpoint}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: model,
+        messages: messagesPayload,
+        stream: true,
+        options: { temperature: 0.35, top_p: 0.9 }
+      }),
+      signal: aiAbortCtrl.signal
+    });
+
+    if (!res.ok) throw new Error(`Lỗi máy chủ Ollama (HTTP ${res.status})`);
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+    let buffer = "";
+
+    botElements.forEach(el => {
+      if (el.typing) el.typing.style.display = "none";
+      if (el.body) el.body.style.display = "block";
+    });
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          const json = JSON.parse(line);
+          if (json.message && json.message.content) {
+            fullResponse += json.message.content;
+            const renderedHtml = renderSimpleMarkdown(fullResponse);
+            botElements.forEach(el => {
+              if (el.body) el.body.innerHTML = renderedHtml;
+              el.box.scrollTop = el.box.scrollHeight;
+            });
+          }
+        } catch (_) {}
+      }
+    }
+
+    if (buffer.trim()) {
+      try {
+        const json = JSON.parse(buffer);
+        if (json.message && json.message.content) {
+          fullResponse += json.message.content;
+          const renderedHtml = renderSimpleMarkdown(fullResponse);
+          botElements.forEach(el => {
+            if (el.body) el.body.innerHTML = renderedHtml;
+          });
+        }
+      } catch (_) {}
+    }
+
+    aiChatHistory.push({ role: "user", content: q });
+    aiChatHistory.push({ role: "assistant", content: fullResponse });
+
+  } catch (err) {
+    botElements.forEach(el => {
+      if (el.typing) el.typing.style.display = "none";
+      if (el.body) {
+        el.body.style.display = "block";
+        if (err.name === "AbortError") {
+          el.body.innerHTML = renderSimpleMarkdown(fullResponse + "\n\n*(Đã dừng sinh câu trả lời)*");
+        } else {
+          el.body.innerHTML = `
+            <p style="color:var(--urgent);margin:0 0 6px">⚠️ <strong>Không thể kết nối Ollama (${escapeHtml(err.message)})</strong></p>
+            <div style="font-size:12px;line-height:1.5;color:var(--ink-2);background:var(--surface);padding:8px 10px;border-radius:6px;border:1px solid var(--line);margin-top:6px">
+              <strong style="color:var(--ink)">Nguyên nhân:</strong> Trình duyệt chặn bảo mật CORS khi mở trực tiếp file (<code>file:///</code>).<br>
+              <strong style="color:var(--ink)">Cách giải quyết (chọn 1 trong 2):</strong><br>
+              1. <em>Khuyên dùng:</em> Nhấp đúp vào file <code>run_dashboard.bat</code> (hoặc gõ <code>python serve.py</code> trong thư mục dashboard) để mở qua <code>http://localhost:8000</code>.<br>
+              2. <em>Hoặc cấp quyền CORS cho Ollama trên Windows:</em> Mở PowerShell và chạy:<br>
+              <code style="display:block;background:var(--bg);padding:4px 6px;margin:4px 0;border-radius:4px;word-break:break-all">[System.Environment]::SetEnvironmentVariable('OLLAMA_ORIGINS', '*', 'User')</code>
+              sau đó chuột phải vào biểu tượng Ollama ở khay Taskbar ➔ chọn <strong>Quit Ollama</strong> rồi mở lại Ollama.
+            </div>
+          `;
+        }
+      }
+      el.box.scrollTop = el.box.scrollHeight;
+    });
+
+    if (err.name !== "AbortError") {
+      const pill = $("aiStatusPill");
+      if (pill) pill.className = "ai-status-pill error";
+      const txt = $("aiStatusText");
+      if (txt) txt.textContent = "Lỗi kết nối";
+    }
+  } finally {
+    aiAbortCtrl = null;
+    sendBtns.forEach(b => { b.style.display = "inline-block"; });
+    stopBtns.forEach(b => { b.style.display = "none"; });
+    chatBoxes.forEach(box => { box.scrollTop = box.scrollHeight; });
+  }
+}
+
+function resetAiChatHistory() {
+  aiChatHistory.length = 0;
+  const r = getRoute();
+  const [o, d] = r.split("-");
+  const introTxt = `Tôi sẵn sàng trả lời các câu hỏi về giá vé và thời điểm bay cho chặng <b>${escapeHtml(airportLabel(o))} → ${escapeHtml(airportLabel(d))}</b>.`;
+  const defaultHtml = `
+    <div class="ai-msg bot">
+      <div class="ai-msg-avatar" aria-hidden="true">🤖</div>
+      <div class="ai-msg-bubble">
+        <p style="margin:0 0 6px"><strong>Đã làm mới đoạn chat!</strong></p>
+        <p style="margin:0">${introTxt}</p>
+      </div>
+    </div>
+  `;
+  if ($("aiChatBox")) $("aiChatBox").innerHTML = defaultHtml;
+  if ($("aiModalChatBox")) $("aiModalChatBox").innerHTML = defaultHtml;
+}
+
+function setupAiCopilotEvents() {
+  // Cấu hình Ollama toggle & check
+  const btnConfig = $("btnAiConfig");
+  const pnlConfig = $("aiConfigPanel");
+  if (btnConfig && pnlConfig) {
+    btnConfig.onclick = () => {
+      const isShown = pnlConfig.style.display !== "none";
+      pnlConfig.style.display = isShown ? "none" : "block";
+    };
+  }
+
+  const btnCheck = $("btnAiCheckConn");
+  if (btnCheck) {
+    btnCheck.onclick = () => checkOllamaHealth();
+  }
+
+  // Clear chat
+  const btnClear = $("btnAiClear");
+  if (btnClear) btnClear.onclick = resetAiChatHistory;
+  const btnModalClear = $("btnModalClear");
+  if (btnModalClear) btnModalClear.onclick = resetAiChatHistory;
+
+  // Send & input - Inline
+  const btnSend = $("btnAiSend");
+  const inp = $("aiUserInput");
+  if (btnSend && inp) {
+    btnSend.onclick = () => sendAiPrompt(inp.value);
+    inp.onkeydown = e => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendAiPrompt(inp.value);
+      }
+    };
+  }
+
+  // Send & input - Modal
+  const btnModalSend = $("btnModalSend");
+  const modalInp = $("aiModalInput");
+  if (btnModalSend && modalInp) {
+    btnModalSend.onclick = () => sendAiPrompt(modalInp.value);
+    modalInp.onkeydown = e => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendAiPrompt(modalInp.value);
+      }
+    };
+  }
+
+  // Stop buttons
+  const btnStop = $("btnAiStop");
+  if (btnStop) {
+    btnStop.onclick = () => { if (aiAbortCtrl) aiAbortCtrl.abort(); };
+  }
+  const btnModalStop = $("btnModalStop");
+  if (btnModalStop) {
+    btnModalStop.onclick = () => { if (aiAbortCtrl) aiAbortCtrl.abort(); };
+  }
+
+  // Prompt chips in both inline & modal
+  document.querySelectorAll(".ai-chip").forEach(chip => {
+    chip.onclick = () => {
+      const q = chip.getAttribute("data-q");
+      if (q) sendAiPrompt(q);
+    };
+  });
+
+  // Floating widget launcher & modal controls
+  const launcher = $("aiWidgetLauncher");
+  const modal = $("aiChatModal");
+  const btnClose = $("btnModalClose");
+
+  if (launcher && modal) {
+    launcher.onclick = () => {
+      const isHidden = modal.style.display === "none" || !modal.style.display;
+      modal.style.display = isHidden ? "flex" : "none";
+      if (isHidden) {
+        updateAiIntroRoute();
+        if (modalInp) modalInp.focus();
+      }
+    };
+    launcher.onkeydown = e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        launcher.click();
+      }
+    };
+  }
+
+  if (btnClose && modal) {
+    btnClose.onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  checkOllamaHealth();
+  updateAiIntroRoute();
+}
+
+setupAiCopilotEvents();
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
 new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 </script>
