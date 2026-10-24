@@ -26,6 +26,7 @@ CANDIDATE_HADOOP = [
     "F:/PKA/Code/DLL/hadoop",
     r"F:\PKA\Code\DLL\hadoop",
     "C:/hadoop",
+    "E:/hadoop",
 ]
 HADOOP_HOME = next((p for p in CANDIDATE_HADOOP if p and os.path.exists(os.path.join(p, "bin", "winutils.exe"))), "F:/PKA/Code/DLL/hadoop")
 os.environ["HADOOP_HOME"] = HADOOP_HOME
@@ -43,6 +44,7 @@ CANDIDATE_CSV = [
     os.path.join(user_home, r".cache\kagglehub\datasets\dilwong\flightprices\versions\1\itineraries.csv"),
     r"C:\Users\phapd\.cache\kagglehub\datasets\dilwong\flightprices\versions\1\itineraries.csv",
     "F:/flight-data/itineraries.csv",
+    "D:/TH-PTDLL/data/flightprices/itineraries.csv",
 ]
 CSV_PATH = next((p for p in CANDIDATE_CSV if p and os.path.exists(p)), "")
 if not CSV_PATH:
@@ -53,7 +55,11 @@ if not CSV_PATH:
 
 # --- Thư mục lưu trữ chính (Ưu tiên ổ F: có dung lượng trống lớn nhất) ---
 def _pick_best_data_dir():
-    candidates = ["F:/flight-data", "C:/flight-data", "D:/flight-data"]
+    # Thư mục đã có tầng Bronze thì dùng luôn, không phải chạy lại từ đầu
+    for c in ["F:/flight-data", "E:/flight-data", "C:/flight-data", "D:/flight-data"]:
+        if os.path.exists(f"{c}/bronze/itineraries/_SUCCESS"):
+            return c
+    candidates = ["F:/flight-data", "E:/flight-data", "C:/flight-data", "D:/flight-data"]
     best_dir = "F:/flight-data"
     best_free = 0
     for c in candidates:
@@ -82,8 +88,29 @@ for d in (EXTERNAL, EXPORTS, SPARK_TMP, GOLD):
     os.makedirs(d, exist_ok=True)
 
 
-def get_spark(app_name="flight-prices", driver_memory="24g"):
-    """Tạo SparkSession chạy local 20 luồng, 24 GB RAM, file tạm đặt ở DATA_DIR."""
+def _total_ram_gb():
+    """RAM vật lý của máy (GB); không đọc được thì trả về 32."""
+    try:
+        import ctypes
+        class MEMORYSTATUSEX(ctypes.Structure):
+            _fields_ = [("dwLength", ctypes.c_ulong), ("dwMemoryLoad", ctypes.c_ulong),
+                        ("ullTotalPhys", ctypes.c_ulonglong), ("ullAvailPhys", ctypes.c_ulonglong),
+                        ("ullTotalPageFile", ctypes.c_ulonglong), ("ullAvailPageFile", ctypes.c_ulonglong),
+                        ("ullTotalVirtual", ctypes.c_ulonglong), ("ullAvailVirtual", ctypes.c_ulonglong),
+                        ("sullAvailExtendedVirtual", ctypes.c_ulonglong)]
+        st = MEMORYSTATUSEX(dwLength=ctypes.sizeof(MEMORYSTATUSEX))
+        ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(st))
+        return st.ullTotalPhys / 1024**3
+    except Exception:
+        return 32
+
+
+# Máy 32 GB → 24g như cũ; máy 16 GB → 9g. Có thể đặt cứng bằng biến môi trường FLIGHT_SPARK_MEMORY, ví dụ "8g".
+DEFAULT_DRIVER_MEMORY = os.environ.get("FLIGHT_SPARK_MEMORY") or ("24g" if _total_ram_gb() >= 30 else "9g")
+
+
+def get_spark(app_name="flight-prices", driver_memory=DEFAULT_DRIVER_MEMORY):
+    """Tạo SparkSession chạy local dùng hết số luồng CPU, bộ nhớ theo RAM của máy, file tạm đặt ở DATA_DIR."""
     os.environ.setdefault("HADOOP_HOME", HADOOP_HOME)
     os.environ["PYSPARK_PYTHON"] = sys.executable
     os.environ["PYSPARK_DRIVER_PYTHON"] = sys.executable
@@ -91,7 +118,7 @@ def get_spark(app_name="flight-prices", driver_memory="24g"):
     from pyspark.sql import SparkSession
     spark = (
         SparkSession.builder.appName(app_name)
-        .master("local[20]")
+        .master("local[*]")
         .config("spark.driver.memory", driver_memory)
         .config("spark.driver.maxResultSize", "6g")
         .config("spark.local.dir", os.path.normpath(SPARK_TMP))
